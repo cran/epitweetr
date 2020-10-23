@@ -16,7 +16,7 @@ The list of tasks updated with produced messages
 This function will geolocate all tweets before the current hour that have not been already geolocated
 }
 \details{
-Geolocates tweets by collection date, and stores the result in the tweets/geolocated folder.
+It geolocates tweets by collection date, and stores the result in the tweets/geolocated folder.
 It starts from the last geolocated date until the last collected tweet. When running on a day that has been partially geolocated,
 it will ignore tweets that have already been processed. 
 

@@ -7,7 +7,7 @@
 search_loop(data_dir = NA)
 }
 \arguments{
-\item{data_dir}{Path to the 'data directory' containing application settings, models and collected tweets.
+\item{data_dir}{optional path to the 'data directory' containing application settings, models and collected tweets. If not provided it will reuse the last set on the current session.
 If not provided the system will try to reuse the existing one from last session call of \code{\link{setup_config}} or use the EPI_HOME environment variable, Default: NA}
 }
 \value{

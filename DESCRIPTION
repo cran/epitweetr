@@ -1,6 +1,6 @@
 Package: epitweetr
 Title: Early Detection of Public Health Threats from Twitter Data
-Version: 0.1.20
+Version: 0.1.24
 Authors@R: c( 
     person(given = "Francisco",
            family = "Orchard",
@@ -11,7 +11,7 @@ Authors@R: c(
             family = "Espinosa",
             role = c("aut", "cre", "fnd"),
             email = "laura.espinosa@ecdc.europa.eu",
-            comment = "Project manager, author of the design and concept of the package, and package maintainer"),
+            comment = c(structure("0000-0003-0748-9657", .Names = "ORCID"), "Project manager, author of the design and concept of the package, and package maintainer")),
      person(given = "Ariana",
             family = "Wijermans",
             role = "ctb",
@@ -54,15 +54,16 @@ Imports: bit64, dplyr, plyr, DT, httpuv, httr, jsonlite, keyring,
         rgeos, rgdal, rmarkdown, rnaturalearthdata, shiny, sp, stringr,
         stats, tidyverse, tidytext, tokenizers, tools, utils, xtable,
         xml2
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: knitr, taskscheduleR
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-09-28 13:02:04 UTC; fod
+Packaged: 2020-10-23 10:43:03 UTC; Antonio
 Author: Francisco Orchard [aut, ctr] (<https://orcid.org/0000-0001-5793-3301>,
     Author of the package and original code),
-  Laura Espinosa [aut, cre, fnd] (Project manager, author of the design
-    and concept of the package, and package maintainer),
+  Laura Espinosa [aut, cre, fnd]
+    (<https://orcid.org/0000-0003-0748-9657>, Project manager, author
+    of the design and concept of the package, and package maintainer),
   Ariana Wijermans [ctb] (Contributor to the design and concept of the
     package),
   Thomas Mollet [ctb, fnd] (Business owner of the project, and
@@ -74,4 +75,4 @@ Author: Francisco Orchard [aut, ctr] (<https://orcid.org/0000-0001-5793-3301>,
   Michael Höhle [ctb]
 Maintainer: Laura Espinosa <laura.espinosa@ecdc.europa.eu>
 Repository: CRAN
-Date/Publication: 2020-10-01 08:30:09 UTC
+Date/Publication: 2020-10-23 13:00:05 UTC

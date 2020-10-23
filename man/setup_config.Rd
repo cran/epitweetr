@@ -41,13 +41,13 @@ The 'data_folder' can also be given as a parameter for program launch functions 
 
 This call will fill (or refresh) a package scoped environment 'conf' that will store the settings. Settings stored in conf are:
 \itemize{
-  \item{ General properties of the Shiny app (stored in properties.json)}
+  \item{General properties of the Shiny app (stored in properties.json)}
   \item{Download plans from the Twitter collection process (stored in topics.json merged with data from the topics.xlsx file}
   \item{Credentials for Twitter API and SMTP stored in the defined keyring}
 }
 
 When calling this function and the keyring is locked, a password will be prompted to unlock the keyring.
-This behaviour can be changed by setting the enviroment variable 'ecdc_wtitter_tool_kr_password' with the password.
+This behaviour can be changed by setting the environment variable 'ecdc_twitter_tool_kr_password' with the password.
 
 Changes made to conf can be stored permanently (except for 'data_dir') using:
 \itemize{

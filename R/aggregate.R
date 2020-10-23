@@ -6,7 +6,7 @@ cached <- new.env()
 #' @param series List of series to aggregate, default: list("country_counts", "geolocated", "topwords")
 #' @param tasks Current tasks for reporting purposes, default: get_tasks()
 #' @return the list of tasks updated with aggregate messages
-#' @details This function will launch a SPARK task of aggregating data collected from the Twitter Search API and geolocated from geotag tweets. By doing the following steps:
+#' @details This function will write new aggregated series by launching a SPARK task of aggregating data collected from the Twitter Search API and geolocated from geotag tweets. By doing the following steps:
 #' - Identify the last aggregates date by looking into the series folder
 #' 
 #' - Look for date range of tweets collected since that day by looking at the stat json files produced by the search loop
@@ -15,7 +15,7 @@ cached <- new.env()
 #' 
 #' - For each series passed as a parameter and for each date to update: 
 #' 
-#'  - a Spark task will be called that will deduplicate tweets for each topic, join them with gelocation information, and aggregate them to the required level and return to the standard output as json lines
+#'  - a Spark task will be called that will deduplicate tweets for each topic, join them with geolocation information, and aggregate them to the required level and return to the standard output as json lines
 #'  
 #'  - the result of this task is parsed using jsonlite and saved into RDS files in the series folder
 #'  
@@ -53,15 +53,21 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
     if(!dir.exists(file.path(conf$data_dir, "series"))) {
       dir.create(file.path(conf$data_dir, "series")) 
     }
-
+    
+    # iterating over each serie
     for(i in 1:length(series)) { 
-      # Getting a dataframe with dates and weeks to aggregate
+      # Getting a list with dates to aggregate and associated file names to containing data for that period
+      # the files are obtained using stats files 
       aggregate_days <- get_aggregate_dates(series[[i]])
     
       if(length(aggregate_days)>0) {
+        # iterating over each day to aggregate
         for(j in 1:length(aggregate_days)) {
+          # extracting date and the files to scan
           created_date <- aggregate_days[[j]]$created_date  
           files <- aggregate_days[[j]]$files
+
+          # getting the week for creating the week folder
           week <- strftime(created_date, format = "%G.%V")
            
           # Creating week folder if does not exists
@@ -70,7 +76,9 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
           }
 
           # Aggregating tweets for the given serie and week
-          tasks <- update_aggregate_task(tasks, "running", paste("serie",  series[[i]], "from", created_date))
+          # Setting the status of the task
+          tasks <- update_aggregate_task(tasks, "running", paste("serie",  series[[i]], "for", created_date))
+          # obtaining a dataframe with the aggregation for the specified serie, date and files which includes a spark call
           agg_df <- get_aggregated_serie(series[[i]], created_date, files)
           
           # If result is not empty proceed to filter out weeks out of scope and save aggregated week serie 
@@ -78,7 +86,7 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
             # Calculating the created week
             agg_df$created_week <- strftime(as.Date(agg_df$created_date, format = "%Y-%m-%d"), format = "%G.%V")
             # Filtering only tweets for current week
-            agg_df <- agg_df %>% dplyr::filter(.data$created_week == week)
+            agg_df <- agg_df %>% dplyr::filter(.data$created_week == week) # this filteer is not necessary anymore since date is already filtered
             agg_df$created_week <- NULL
             # Casting week and date to numeric values
             agg_df$created_weeknum <- as.integer(strftime(as.Date(agg_df$created_date, format = "%Y-%m-%d"), format = "%G%V"))
@@ -86,6 +94,7 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
             
             # saving the dataset to disk (with overwrite)
             message(paste("saving ", series[[i]]," data for week", week, ", day", created_date))
+            # TODO: maybe we could make this action atomic to avoid data corruption
             saveRDS(agg_df, file = file.path(conf$data_dir, "series",week, paste(series[[i]], "_", strftime(created_date, format = "%Y.%m.%d."), "Rds", sep = "")), compress = FALSE) 
           } else {
             message(paste("No rows found for", series[[i]]," on week", week, ", day", created_date ))  
@@ -95,7 +104,7 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
     }
  
     #deleting cached datasets
-    rm(list = ls(cached), envir = cached)
+    rm(list = ls(cached), envir = cached) #this only has effect on current session (it would not impact the shuny app, there is a different mechanidm for that)
     message(paste(Sys.time(), "aggregation done!"))
     # Setting status to succès
     tasks <- update_aggregate_task(tasks, "success", "", end = TRUE)
@@ -118,7 +127,7 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
 }
 
 #' @title Getting already aggregated time series produced by \code{\link{detect_loop}}
-#' @description Returns the required aggregated dataset for the selected period and topics defined by the filter.
+#' @description Read and returns the required aggregated dataset for the selected period and topics defined by the filter.
 #' @param dataset A character(1) vector with the name of the series to request, it must be one of 'country_counts', 'geolocated' or 'topwords', default: 'country_counts'
 #' @param cache Whether to use the cache for lookup and storing the returned dataframe, default: TRUE
 #' @param filter A named list defining the filter to apply on the requested series, default: list()
@@ -128,7 +137,7 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
 #' If no filter is provided all data series are returned, which can end up with millions of rows depending on the time series. 
 #' To limit by period, the filter list must have an element 'period' containing a date vector or list with two dates representing the start and end of the request.
 #'
-#' To limit by topic, the filter list must have an element 'topic' containing a non empty character vector or list with the names of the topics to return.
+#' To limit by topic, the filter list must have an element 'topic' containing a non-empty character vector or list with the names of the topics to return.
 #' 
 #' The available time series are: 
 #' \itemize{
@@ -169,22 +178,28 @@ aggregate_tweets <- function(series = list("country_counts", "geolocated", "topw
 #' @importFrom utils tail
 get_aggregates <- function(dataset = "country_counts", cache = TRUE, filter = list()) {
   `%>%` <- magrittr::`%>%`
+  # getting the name for cache lookup dataset dependant
   last_filter_name <- paste("last_filter", dataset, sep = "_")
+
+  # getting the last aggregated end on to check if the cache is outdated
   filter$last_aggregate <- get_tasks()$aggregate$end_on  
+
+  # checking wether we can reuse the cacje
   reuse_filter <- 
-    exists(last_filter_name, where = cached) && 
-    (!exists("topic", cached[[last_filter_name]]) ||
+    exists(last_filter_name, where = cached) && #cache entry exists for that dataset
+    (exists("last_aggregate", where = cached[[last_filter_name]]) && cached[[last_filter_name]]$last_aggregate == filter$last_aggregate) && # No new aggregation has been finished
+    (!exists("topic", cached[[last_filter_name]]) || # all topics are cached or 
       (
-        exists("topic", cached[[last_filter_name]]) && 
-        exists("topic", filter) &&  
-        all(filter$topic %in% cached[[last_filter_name]]$topic)
+        exists("topic", cached[[last_filter_name]]) && # there are some topic cached
+        exists("topic", filter) &&  # there is a topic on the current applied filter
+        all(filter$topic %in% cached[[last_filter_name]]$topic) # all filtered topic is cached
       )
-    ) &&
-    (!exists("period", cached[[last_filter_name]]) ||
+    ) && # AND
+    (!exists("period", cached[[last_filter_name]]) || # all periods are cached or
       (
-        exists("period", cached[[last_filter_name]]) && 
-        exists("period", filter) &&
-        cached[[last_filter_name]]$period[[1]] <= filter$period[[1]] &&
+        exists("period", cached[[last_filter_name]]) &&  # there are some period cached
+        exists("period", filter) && # there is a period on the filter
+        cached[[last_filter_name]]$period[[1]] <= filter$period[[1]] && # and filetered period is contained on cached period
         cached[[last_filter_name]]$period[[2]] >= filter$period[[2]]
       )
     )
@@ -202,6 +217,7 @@ get_aggregates <- function(dataset = "country_counts", cache = TRUE, filter = li
   }
   else {
     # No cache hit getting from aggregated files
+    # starting by listing all series files
     files <- list.files(path = file.path(conf$data_dir, "series"), recursive=TRUE, pattern = paste(dataset, ".*\\.Rds", sep=""))
     if(length(files) == 0) {
       warning(paste("Dataset ", dataset, " not found in any week folder inside", conf$data_dir, "/series. Please make sure the data/series folder is not empty and run aggregate process", sep = ""))  
@@ -223,17 +239,18 @@ get_aggregates <- function(dataset = "country_counts", cache = TRUE, filter = li
         ]
       }
 
-      # Exracting data from aggregated files
+      # Extracting data from aggregated files
       dfs <- lapply(files, function (file) {
 	      message(paste("reading", file))
         readRDS(file.path(conf$data_dir, "series", file)) %>% 
+          dplyr::mutate(topic = stringr::str_replace_all(.data$topic, "%20", " ")) %>% #putting back espaces from %20 to " "
           dplyr::filter(
             (if(exists("topic", where = filter)) .data$topic %in% filter$topic else TRUE) & 
             (if(exists("period", where = filter)) .data$created_date >= filter$period[[1]] & .data$created_date <= filter$period[[2]] else TRUE)
           )
       })
       
-      #Joining data exctractes if any or retunning empty dataser otherwise
+      #Joining data extracts if any or returning empty dataset otherwise
       ret <- 
         if(length(files) > 0)
           jsonlite::rbind_pages(dfs)
@@ -245,22 +262,28 @@ get_aggregates <- function(dataset = "country_counts", cache = TRUE, filter = li
   }
 } 
 
-# getting last geolocated date
+# getting last geolocated date by parsing dates on geolocated files
 get_geolocated_period <- function(dataset) {
+  # listing all geolocated files respecting the naming convention
   last_geolocate <- list.dirs(file.path(conf$data_dir, "tweets", "geolocated"), recursive=TRUE)
   last_geolocate <- last_geolocate[grepl(".*\\.json.gz$", last_geolocate)]
   if(length(last_geolocate)==0) stop("To aggregate, or calculate alerts geolocation must have been succesfully executed, but no geolocation files where found")
+  # extracting and parsing dates from file names and getting min and max
   first_geolocate <- as.Date(min(sapply(last_geolocate, function(f) {as.Date(gsub("\\.", "-", substr(tail(strsplit(f, "/")[[1]], n=1), 1, 10)))})), origin = '1970-01-01')
   last_geolocate <- as.Date(max(sapply(last_geolocate, function(f) {as.Date(gsub("\\.", "-", substr(tail(strsplit(f, "/")[[1]], n=1), 1, 10)))})), origin = '1970-01-01')
   list(first = first_geolocate, last = last_geolocate) 
 }
 
 # getting last aggregation date or NA if first
+# date is obtained by sorting and reading first and last file
 get_aggregated_period <- function(dataset) {
+  # listing all aggregated files for given dataset 
   agg_files <- list.files(file.path(conf$data_dir, "series"), recursive=TRUE, full.names =TRUE)
   agg_files <- agg_files[grepl(paste(".*", dataset, ".*\\.Rds", sep = ""), agg_files)] 
+  # sorting them alphabetically. This makes them sorted by date too because of namind convention
   agg_files <- sort(agg_files)
   if(length(agg_files) > 0) { 
+   # getting date information from firt and last aggregated file
    first_file <- agg_files[[1]]
    first_df <- readRDS(first_file)
    last_file <- agg_files[[length(agg_files)]]
@@ -296,6 +319,7 @@ get_aggregate_dates <- function(dataset) {
   #Getting the last day aggregated for this serie
   #if no aggregation exists, aggregation will start on first available geolocation
   last_aggregate <- get_aggregated_period(dataset)$last
+  # particular case where no aggregation has never been done. We start aggregating on first geolocated date
   last_aggregate <- if(!is.na(last_aggregate)) last_aggregate else first_geolocate
 
   #We know that all tweets collected before last_aggregate date have been already aggregated
@@ -303,25 +327,38 @@ get_aggregate_dates <- function(dataset) {
   #Aggregation imcumbes all tweets collected between last_aggregate and last_geolocate
   #We have to find the oldest tweet creation date collected during that period aggregation will start on that day
   stat_files <-  list.files(file.path(conf$data_dir, "stats"), recursive=TRUE, full.names =TRUE)
-  created_from <-
+  
+  #created from is going to contain the date of the oldest tweet that was collected after the last aggregation 
+  created_from <- # looking on all stat files if there is a toipic wich is the oldest tweet collected date
     as.Date(
       min(
         sapply(stat_files, function(f) {
           stats <- jsonlite::read_json(f, simplifyVector = FALSE, auto_unbox = TRUE)
-          min(sapply(stats, function(t) {if(as.Date(t$collected_from) >= last_aggregate && as.Date(t$created_from) < last_aggregate) as.Date(t$created_from) else last_aggregate}))  
+          min(sapply(stats, function(t) {
+            if(as.Date(t$collected_from) >= last_aggregate && as.Date(t$created_from) < last_aggregate) #case of tweets ciollected after last aggreation but for older posted dates
+              as.Date(t$created_from) # We return the minimum tweet posted date for that topic on that tar.gz file
+            else # case of tweets collected after the last aggregate or posted after the last aggregate
+              last_aggregate # we returb last aggregate
+          }))  
         })
       ),
       origin='1970-01-01'
     )
   
+  #created_to is the last date to aggregate which should just be the date of last geolocation (you cannot aggregate if you do no have geolocated)
   created_to <- last_geolocate
+
   ret <- list()
+  # Creating a list for each date on the creted_from:created_to dates. which are the dates thar are going to be recalculated
+  # including all collected dates based on stat file names
   if(last_geolocate >= created_to) {
     for(i in 1:length(created_from:created_to)) {
       ret[[i]] <- list(created_date = created_from + (i-1), files = list())
       for(f in stat_files) {
         stats <- jsonlite::read_json(f, simplifyVector = FALSE, auto_unbox = TRUE)
         for(t in stats) {
+           # if the date to recalculate in the loop is within the crated period of the statistics for that topic then we will incude files witèh these names on aggregation
+           # because stat file names matches withe geolocated file names and with collected tweet file named
            if(as.Date(t$created_from) <= ret[[i]]$created_date && as.Date(t$created_to) >= ret[[i]]$created_date) {
              ret[[i]]$files <- unique(c(ret[[i]]$files, substr(tail(strsplit(f, "/")[[1]], n = 1), 1, 10))) 
            }
@@ -384,7 +421,8 @@ get_aggregated_serie <- function(serie_name, created_date, files) {
         paste(conf$topics[[i]]$topic, "_", terms, sep = "")
       })) 
     
-    # Getting top word aggregation for each
+    # Getting top word aggregation by using an streaming aggregation
+    # Query is not aggregated by spark but by an R function wich is called each 500 lines
     top_chunk <- get_geotagged_tweets(regexp = agg_regex
       , sources_exp = list(
           tweet = list(
@@ -431,7 +469,7 @@ get_aggregated_serie <- function(serie_name, created_date, files) {
         dplyr::ungroup() 
     }
   } else if(serie_name == "country_counts") {
-    # Getting the expression for known users
+    # Getting the expression for known users and writing it as a file so it can be read and applied by spark on query
     known_user <- 
       paste("screen_name in ('"
         , paste(get_known_users(), collapse="','")

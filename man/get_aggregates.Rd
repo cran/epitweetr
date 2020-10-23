@@ -17,7 +17,7 @@ get_aggregates(dataset = "country_counts", cache = TRUE, filter = list())
 A dataframe containing the requested series for the requested period
 }
 \description{
-Returns the required aggregated dataset for the selected period and topics defined by the filter.
+Read and returns the required aggregated dataset for the selected period and topics defined by the filter.
 }
 \details{
 This function will look in the 'series' folder, which contains Rds files per weekday and type of series. It will parse the names of file and folders to limit the files to be read.
@@ -25,7 +25,7 @@ Then it will apply the filters on each dataset for finally joining the matching 
 If no filter is provided all data series are returned, which can end up with millions of rows depending on the time series. 
 To limit by period, the filter list must have an element 'period' containing a date vector or list with two dates representing the start and end of the request.
 
-To limit by topic, the filter list must have an element 'topic' containing a non empty character vector or list with the names of the topics to return.
+To limit by topic, the filter list must have an element 'topic' containing a non-empty character vector or list with the names of the topics to return.
 
 The available time series are: 
 \itemize{

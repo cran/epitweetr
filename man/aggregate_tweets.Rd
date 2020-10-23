@@ -21,7 +21,7 @@ the list of tasks updated with aggregate messages
 Get all the tweets from the Twitter Standard Search API json files and the geolocated tweets json files obtained by calling (\code{\link{geotag_tweets}}) and store the results in the series folder as daily Rds files
 }
 \details{
-This function will launch a SPARK task of aggregating data collected from the Twitter Search API and geolocated from geotag tweets. By doing the following steps:
+This function will write new aggregated series by launching a SPARK task of aggregating data collected from the Twitter Search API and geolocated from geotag tweets. By doing the following steps:
 - Identify the last aggregates date by looking into the series folder
 
 - Look for date range of tweets collected since that day by looking at the stat json files produced by the search loop
@@ -30,7 +30,7 @@ This function will launch a SPARK task of aggregating data collected from the Tw
 
 - For each series passed as a parameter and for each date to update: 
 
- - a Spark task will be called that will deduplicate tweets for each topic, join them with gelocation information, and aggregate them to the required level and return to the standard output as json lines
+ - a Spark task will be called that will deduplicate tweets for each topic, join them with geolocation information, and aggregate them to the required level and return to the standard output as json lines
  
  - the result of this task is parsed using jsonlite and saved into RDS files in the series folder
  

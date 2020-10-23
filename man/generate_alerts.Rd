@@ -37,7 +37,7 @@ if(FALSE){
    message('Please choose the epitweetr data directory')
    setup_config(file.choose())
 
-   # calculating alerts for last day tweets and sending emails to subscriptors
+   # calculating alerts for last day tweets and sending emails to subscribers
    generate_alerts()
 }
 }

@@ -10,7 +10,7 @@ check_all()
 Dataframe containing the statuses of all realized checks
 }
 \description{
-run  a set of automated sanity checks for helping the user to troubleqhot issues
+It runs a set of automated sanity checks for helping the user to troubleqhot issues
 }
 \details{
 This function executes a series of sanity checks, concerninr, java, bitness, task statusn dependencies and Twitter authentication.
