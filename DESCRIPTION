@@ -1,6 +1,6 @@
 Package: epitweetr
 Title: Early Detection of Public Health Threats from Twitter Data
-Version: 0.1.24
+Version: 0.1.28
 Authors@R: c( 
     person(given = "Francisco",
            family = "Orchard",
@@ -48,7 +48,6 @@ License: EUPL
 URL: https://github.com/EU-ECDC/epitweetr
 BugReports: https://github.com/EU-ECDC/epitweetr/issues
 Encoding: UTF-8
-LazyData: true
 Imports: bit64, dplyr, plyr, DT, httpuv, httr, jsonlite, keyring,
         emayili, ggplot2, magrittr, parallel, plotly, rtweet, readxl,
         rgeos, rgdal, rmarkdown, rnaturalearthdata, shiny, sp, stringr,
@@ -58,7 +57,7 @@ RoxygenNote: 7.1.1
 Suggests: knitr, taskscheduleR
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2020-10-23 10:43:03 UTC; Antonio
+Packaged: 2021-04-08 05:38:21 UTC; lespinosa
 Author: Francisco Orchard [aut, ctr] (<https://orcid.org/0000-0001-5793-3301>,
     Author of the package and original code),
   Laura Espinosa [aut, cre, fnd]
@@ -75,4 +74,4 @@ Author: Francisco Orchard [aut, ctr] (<https://orcid.org/0000-0001-5793-3301>,
   Michael Höhle [ctb]
 Maintainer: Laura Espinosa <laura.espinosa@ecdc.europa.eu>
 Repository: CRAN
-Date/Publication: 2020-10-23 13:00:05 UTC
+Date/Publication: 2021-04-08 22:20:03 UTC
