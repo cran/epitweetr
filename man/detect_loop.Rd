@@ -18,13 +18,13 @@ Infinite loop ensuring the daily signal detection and email alerts
 }
 \details{
 The detect loop is composed of three 'one shot tasks' \code{\link{download_dependencies}}, \code{\link{update_geonames}}, \code{\link{update_languages}} ensuring the system has
-all necessary components and data to run the three recurrent tasks, \code{\link{geotag_tweets}}, \code{\link{aggregate_tweets}}, \code{\link{generate_alerts}}
+all necessary components and data to run the three recurrent tasks \code{\link{generate_alerts}}
 
 The loop report progress on the 'tasks.json' file which is read or created by this function.
 
 The recurrent tasks are scheduled to be executed each 'detect span' minutes, which is a parameter set on the Shiny app.
 
-If any of these tasks fails it will be retried three times before going to a abort status. Aborted tasks can be relauched from the Shiny app.
+If any of these tasks fails it will be retried three times before going to a abort status. Aborted tasks can be relaunched from the Shiny app.
 }
 \examples{
 if(FALSE){
@@ -43,10 +43,6 @@ if(FALSE){
  \code{\link{update_languages}}
 
  \code{\link{detect_loop}}
- 
- \code{\link{geotag_tweets}}
- 
- \code{\link{aggregate_tweets}}
  
  \code{\link{generate_alerts}}
 

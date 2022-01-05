@@ -69,8 +69,6 @@ if(FALSE){
 \seealso{
 \code{\link{trend_line}}
  \code{\link{create_topwords}}
- \code{\link{aggregate_tweets}}
- \code{\link{geotag_tweets}}
  \code{\link{detect_loop}}
  \code{\link{search_loop}}
  \code{\link[sp]{spTransform}},\code{\link[sp]{coordinates}},\code{\link[sp]{is.projected}},\code{\link[sp]{CRS-class}}

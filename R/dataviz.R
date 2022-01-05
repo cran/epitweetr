@@ -14,7 +14,7 @@
 #' @param no_historic Number of observations to build the baseline for signal detection, default: 7
 #' @param bonferroni_correction Logical value indicating whether to apply the Bonferroni correction for signal detection, default: FALSE
 #' @param same_weekday_baseline Logical value indicating whether to use same day of weeks for building the baseline or consecutive days, default: FALSE
-#' @return A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the dataframe that was used to build the chart.
+#' @return A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the data frame that was used to build the chart.
 #' @details Produces a multi-region line chart for a particular topic of number of tweets collected based on the provided parameters. 
 #' Alerts will be calculated using a modified version of the EARS algorithm that applies a Farrington inspired downweighting of previous outliers.
 #' 
@@ -37,8 +37,6 @@
 #'  \code{\link{create_map}}
 #'  \code{\link{create_topwords}}
 #'  \code{\link{generate_alerts}}
-#'  \code{\link{aggregate_tweets}}
-#'  \code{\link{geotag_tweets}}
 #'  \code{\link{detect_loop}}
 #'  \code{\link{search_loop}}
 #' @rdname trend_line
@@ -69,7 +67,7 @@ trend_line <- function(
   # defining the environment variable for returning complementary data 
   logenv <- new.env()
 
-  # getting the data with counts ans alerts from country counts  
+  # getting the data with counts and alerts from country counts  
   df <- 
     calculate_regions_alerts(
       topic = topic,
@@ -174,7 +172,7 @@ plot_trendline <- function(df,countries,topic,date_min,date_max, date_type, alph
   # Calculating breaks of y axis
   y_breaks <- unique(floor(pretty(seq(0, (max(df$limit, df$number_of_tweets, na.rm = TRUE, 0) + 1) * 1.1))))
 
-  # Calculating tweeter location scope count message
+  # Calculating tweet location scope count message
   scope_count <- format(sum(df$number_of_tweets), big.mark = " ", scientific=FALSE)
   total_count <- if(is.na(total_count)) NA else format(total_count, big.mark = " ", scientific=FALSE)
   location_message <- (paste("(n=",scope_count,")", sep = "")) 
@@ -218,7 +216,7 @@ plot_trendline <- function(df,countries,topic,date_min,date_max, date_type, alph
           # Month format day of month in period start if period is less or equal to 2 years but more than 20 weeks
           } else if(years <=2) {
             "%Y-%b"
-          # Year formar if more than 2 years
+          # Year format if more than 2 years
           } else { 
             "%Y"
           }
@@ -276,7 +274,7 @@ plot_trendline <- function(df,countries,topic,date_min,date_max, date_type, alph
   
 
   df <- dplyr::rename(df,"Number of tweets" = .data$number_of_tweets, "Tweet date" = .data$date,"Topic"= .data$topic)
-  # returning data and chert
+  # returning data and chart
   list("chart" = fig_line, "data" = df) 
 }
 
@@ -317,8 +315,6 @@ plot_trendline <- function(df,countries,topic,date_min,date_max, date_type, alph
 #' @seealso 
 #'  \code{\link{trend_line}}
 #'  \code{\link{create_topwords}}
-#'  \code{\link{aggregate_tweets}}
-#'  \code{\link{geotag_tweets}}
 #'  \code{\link{detect_loop}}
 #'  \code{\link{search_loop}}
 #'  \code{\link[sp]{spTransform}},\code{\link[sp]{coordinates}},\code{\link[sp]{is.projected}},\code{\link[sp]{CRS-class}}
@@ -437,7 +433,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
   )
 
   # Setting country codes as requested location types as requested
-  # this is to deal with location type and aggregation level (nationat vs subnational) 
+  # this is to deal with location type and aggregation level (national vs subnational) 
   df <- (
          if(location_type =="tweet" && !detailed)
            df %>% dplyr::rename(country_code = .data$tweet_geo_country_code) %>% dplyr::select(-.data$user_geo_country_code)
@@ -497,12 +493,12 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
         dplyr::summarize(count = sum(.data$tweets)) %>%
         dplyr::ungroup() 
   )
-  # retunrning an empty chart if no rows are found
+  # returning an empty chart if no rows are found
   if(nrow(df)==0) {
     return(get_empty_chart("No data found for the selected topic, region and period"))
   }
 
-  # Adding country properties (bounding boxes ans country names)
+  # Adding country properties (bounding boxes and country names)
   regions <- get_country_items()
   map <- get_country_index_map()
   df$Country <- sapply(unname(map[df$country_code]), function(i) if(!is.na(i)) regions[[i]]$name else NA)
@@ -523,7 +519,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
   lat_center <- mean(c(min_lat, max_lat))
   long_center <- mean(c(min_long, max_long))
 
-  # Getting the projection to use which will be centered the global bounding box
+  # Getting the projection to use which will center the global bounding box
   full_world <- (1 %in% countries || 2 %in% countries)
   proj <- (
     if(!is.null(proj)) 
@@ -535,7 +531,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
       # Using projection Lambert Azimuthal Equal Area for partial maps
       paste("+proj=laea", " +lon_0=", long_center, " +lat_0=", lat_center ,sep = "") 
   )
-  # Projecting the country counts dataframe on the target coordinate system this projected dataframe contains the bubble X,Y coordinates
+  # Projecting the country counts data frame on the target coordinate system this projected data frame contains the bubble X,Y coordinates
   proj_df <- as.data.frame(
     sp::spTransform(
       {
@@ -547,10 +543,10 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
       sp::CRS(proj)
     )
   )
-  # Extracting country polygones from naturalraearth dat
+  # Extracting country polygons from naturalraearth data
   countries_geo <- rnaturalearthdata::countries50 
   
-  # Projecting country polygones on target coordinate system
+  # Projecting country polygons on target coordinate system
   countries_proj <- as.data.frame(
     sp::spTransform(
       {
@@ -571,7 +567,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
   # Getting original coordinate system for filtering points
   countries_non_proj <-  ggplot2::fortify(countries_geo)
 
-  # Joining projectes map dataframe with codes and names
+  # Joining projects map data frame with codes and names
   countries_proj_df <- ggplot2::fortify(countries_proj) %>%
     # Renaming projected long lat tp x y
     dplyr::rename(x = .data$long, y = .data$lat) %>%
@@ -643,6 +639,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
     axis.ticks = ggplot2::element_blank(),
     axis.title.x = ggplot2::element_blank(),
     axis.title.y = ggplot2::element_blank(),
+    legend.direction="horizontal",
     legend.position = "bottom"
   ))
 
@@ -663,7 +660,7 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
     ggplot2::scale_fill_manual(
       values = c("#C7C7C7", "#E5E5E5" , "white", sapply(cuts, function(c) "#65B32E")), 
       breaks = c("a. Selected", "b. Excluded", "c. Lakes", plotlycuts),
-      guide = FALSE
+      guide = "none"
     ) +
     ggplot2::coord_fixed(ratio = 1, ylim=if(full_world) NULL else c(minY, maxY), xlim=if(full_world) NULL else c(minX, maxX)) +
     ggplot2::labs(
@@ -707,11 +704,11 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
 #' @param date_min Date indicating start of the reporting period, default: "1900-01-01"
 #' @param date_max Date indicating end of the reporting period, default: "2100-01-01"
 #' @param with_retweets Logical value indicating whether to include retweets in the time series, default: FALSE
-#' @param location_type Character(1) this parameter is currently being IGNORED since this report shows only tweet location and cannot showed user or both locations for performance reasons, default: 'tweet'
+#' @param location_type Character(1) this parameter is currently being IGNORED since this report shows only tweet location and cannot show user or both locations for performance reasons, default: 'tweet'
 #' @param top numeric(1) Parameter indicating the number of words to show, default: 25
-#' @return A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the dataframe that was used to build the map.
-#' @details Produces a bar chat showing the occurrences of the most popular words in the collected tweets based on the provided parameters.
-#' For performance reasons on the \code{\link{aggregate_tweets}} function, this report only shows tweet location and ignores the location_type parameter
+#' @return A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the data frame that was used to build the map.
+#' @details Produces a bar chart showing the occurrences of the most popular words in the collected tweets based on the provided parameters.
+#' For performance reasons on tweet aggregation this report only shows tweet location and ignores the location_type parameter
 #' 
 #' This report may be empty for combinations of countries and topics with very few tweets since for performance reasons, the calculation of top words is an approximation using chunks of 10.000 tweets.
 #'
@@ -731,8 +728,6 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
 #' @seealso 
 #'  \code{\link{trend_line}}
 #'  \code{\link{create_map}}
-#'  \code{\link{aggregate_tweets}}
-#'  \code{\link{geotag_tweets}}
 #'  \code{\link{detect_loop}}
 #'  \code{\link{search_loop}}
 #' @export 
@@ -743,39 +738,113 @@ create_map <- function(topic=c(),countries=c(1), date_min="1900-01-01",date_max=
 #' @importFrom utils head
 #' 
 create_topwords <- function(topic,country_codes=c(),date_min="1900-01-01",date_max="2100-01-01", with_retweets = FALSE, location_type = "tweet", top = 25) {
+  create_topchart(topic = topic, serie = "topwords", country_codes = country_codes, date_min = date_min, date_max = date_max, location_type = location_type, top = top)
+}
+
+#' @title Plot the top elements for a specific series on the epitweetr dashboard
+#' @description Generates a bar plot of most popular elements in tweets, for one topic. Top elements among ("topwords", "hashtags", "entities", "contexts", "urls")
+#' @param topic Character(1) containing the topic to use for the report
+#' @param serie Character(1) name of the series to be used for the report. It should be one of ("topwords", "hashtags", "entities", "contexts", "urls")
+#' @param country_codes Character vector containing the ISO 3166-1 alpha-2 countries to plot, default: c()
+#' @param date_min Date indicating start of the reporting period, default: "1900-01-01"
+#' @param date_max Date indicating end of the reporting period, default: "2100-01-01"
+#' @param with_retweets Logical value indicating whether to include retweets in the time series, default: FALSE
+#' @param location_type Character(1) this parameter is currently being IGNORED since this report shows only tweet location and cannot show user or both locations for performance reasons, default: 'tweet'
+#' @param top numeric(1) Parameter indicating the number of words to show, default: 25
+#' @return A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the data frame that was used to build the map.
+#' @details Produces a bar chart showing the occurrences of the most popular words in the collected tweets based on the provided parameters.
+#' For performance reasons on tweet aggregation, this report only shows tweet location and ignores the location_type parameter
+#' 
+#' This report may be empty for combinations of countries and topics with very few tweets since for performance reasons, the calculation of top words is an approximation using chunks of 10.000 tweets.
+#'
+#' This functions requires that \code{\link{search_loop}} and \code{\link{detect_loop}} have already been run successfully to show results.
+#' @examples 
+#' if(FALSE){
+#'    message('Please choose the epitweetr data directory')
+#'    setup_config(file.choose())
+#'    #Getting topword chart for dengue for France, Chile, Australia for last 30 days
+#'    create_topchart(
+#'      topic = "dengue", 
+#'      serie = "topwords", 
+#'      country_codes = c("FR", "CL", "AU"),
+#'      date_min = as.Date(Sys.time())-30, 
+#'      date_max=as.Date(Sys.time())
+#'    ) 
+#'  }
+#' @seealso 
+#'  \code{\link{trend_line}}
+#'  \code{\link{create_map}}
+#'  \code{\link{detect_loop}}
+#'  \code{\link{search_loop}}
+#' @export 
+#' @importFrom magrittr `%>%`
+#' @importFrom dplyr filter group_by summarize ungroup arrange mutate
+#' @importFrom ggplot2 ggplot aes geom_col xlab coord_flip labs scale_y_continuous theme_classic theme element_text margin element_blank
+#' @importFrom stats reorder
+#' @importFrom utils head
+#' 
+create_topchart <- function(topic, serie, country_codes=c(),date_min="1900-01-01",date_max="2100-01-01", with_retweets = FALSE, location_type = "tweet", top = 25) {
   #Importing pipe operator
   `%>%` <- magrittr::`%>%`
   f_topic <- topic
+  dataset <- serie
+
+  # Getting the right top field depending on the series 
+  top_field <- (
+    if(serie == "topwords") "token"
+    else if(serie == "entities") "entity"
+    else if(serie == "hashtags") "hashtag"
+    else if(serie == "contexts") "context"
+    else if(serie == "urls") "url"
+    else "top"
+  )
+
   # getting the data from topwords series
-  df <- get_aggregates(dataset = "topwords", filter = list(topic = f_topic, period = list(date_min, date_max)))
-  
-  #filtering data by countries ans removing some unwanted tokens
+  filter <- (
+    if(length(country_codes) > 0)
+      list(topic = f_topic, period = list(date_min, date_max), tweet_geo_country_code = country_codes)
+    else 
+      list(topic = f_topic, period = list(date_min, date_max))
+  )
+  df <- get_aggregates(dataset = dataset, filter =filter , top_field = top_field, top_freq = "frequency")
+
+  # renaming the series depending column to "top"  
+  df <- df %>% dplyr::rename(top = !!as.symbol(top_field))
+
+  # getting the series dependant title part  
+  serie_title <- (
+    if(serie == "topwords") "words"
+    else serie
+  )
+  if(nrow(df)==0 || is.null(df)) {
+    return(get_empty_chart("No data found for the selected topic, region and period"))
+  }
+  #filtering data by countries
   df <- (df
       %>% dplyr::filter(
         .data$topic == f_topic 
         & .data$created_date >= date_min 
         & .data$created_date <= date_max
         & (if(length(country_codes)==0) TRUE else .data$tweet_geo_country_code %in% country_codes )
-        & .data$tokens != "via" & nchar(.data$tokens) > 1
       ))
  
   # dealing with retweets if requested
   if(!with_retweets) df$frequency <- df$original
 
-  # grouping by topwords and limiting as requested
+  # grouping by top and limiting as requested
   df <- (df
       %>% dplyr::filter(!is.na(.data$frequency))
-      %>% dplyr::group_by(.data$tokens)
+      %>% dplyr::group_by(.data$top)
       %>% dplyr::summarize(frequency = sum(.data$frequency))
       %>% dplyr::ungroup() 
       %>% dplyr::arrange(-.data$frequency) 
       %>% head(top)
-      %>% dplyr::mutate(tokens = reorder(.data$tokens, .data$frequency))
+      %>% dplyr::mutate(top = reorder(.data$top, .data$frequency))
   )
   if(nrow(df)==0) {
     return(get_empty_chart("No data found for the selected topic, region and period"))
   }
-  # Calculating breaks for y axid
+  # Calculating breaks for y axis
   y_breaks <- unique(floor(pretty(seq(0, (max(df$frequency) + 1) * 1.1))))
   
   # removing scientific pen
@@ -785,15 +854,15 @@ create_topwords <- function(topic,country_codes=c(),date_min="1900-01-01",date_m
 
   # plotting
   fig <- (
-      df %>% ggplot2::ggplot(ggplot2::aes(x = .data$tokens, y = .data$frequency)) +
+      df %>% ggplot2::ggplot(ggplot2::aes(x = .data$top, y = .data$frequency)) +
            ggplot2::geom_col(fill = "#65B32E") +
            ggplot2::xlab(NULL) +
            ggplot2::coord_flip(expand = FALSE) +
            ggplot2::labs(
               y = "Count",
-              title = paste("Top words of tweets mentioning", topic),
+              title = paste("Top ", serie_title, " of tweets mentioning", topic),
               subtitle = paste("from", date_min, "to", date_max),
-              caption = "Top words figure only considers tweet location, ignoring the location type parameter"
+              caption = "Top ", serie_title, " figure only considers tweet location, ignoring the location type parameter"
            ) +
            ggplot2::scale_y_continuous(labels = function(x) format(x, scientific = FALSE), breaks = y_breaks, limits = c(0, max(y_breaks)), expand=c(0 ,0))+
            ggplot2::theme_classic(base_family = get_font_family()) +

@@ -8,24 +8,36 @@ get_alerts(
   topic = character(),
   countries = numeric(),
   from = "1900-01-01",
-  until = "2100-01-01"
+  until = "2100-01-01",
+  toptweets = 0,
+  limit = 0,
+  duplicates = "all",
+  progress = function(a, b) { }
 )
 }
 \arguments{
 \item{topic}{Character vector. When it is not empty it will limit the returned signals to the provided topics, default: character()}
 
 \item{countries}{Character vector containing the names of countries or regions or a numeric vector containing the indexes of countries 
-as displayed at the shiny App to filter the signals to return., default: numeric()}
+as displayed at the Shiny App to filter the signals to return., default: numeric()}
 
 \item{from}{Date defining the beginning of the period of signals to return, default: '1900-01-01'}
 
 \item{until}{Date defining the end of the period of signals to return, default: '2100-01-01'}
+
+\item{toptweets}{Integer number of top tweets to be added to the alert. These are obtained from the tweet index based on topwords and Lucene score, default: 0}
+
+\item{limit}{Maximum number of alerts returned, default: 0}
+
+\item{duplicates}{Character, action to decide what to do with alerts generated on the same day. Options are "all" (keep all alerts), "first" get only first alert and "last" for getting only the last alert}
+
+\item{progress}{Function, function to report progress it should receive two parameter a progress between 0 and 1 and a message, default: empty function}
 }
 \value{
-a dataframe containing the calculated alerts for the period. If no alerts are found then NULL is returned
+a data frame containing the calculated alerts for the period. If no alerts are found then NULL is returned
 }
 \description{
-Returns a dataframe of signals produced by the \code{\link{detect_loop}}, which are stored on the signal folder.
+Returns a data frame of signals produced by the \code{\link{detect_loop}}, which are stored on the signal folder.
 }
 \details{
 For more details see the package vignette.

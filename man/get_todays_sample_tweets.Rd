@@ -2,7 +2,7 @@
 % Please edit documentation in R/geo-tagging.R
 \name{get_todays_sample_tweets}
 \alias{get_todays_sample_tweets}
-\title{Get a sample of latest tweet geolocations}
+\title{Get a sample of latest tweet geolocations (removed)}
 \usage{
 get_todays_sample_tweets(limit = 1000, text_col = "text", lang_col = "lang")
 }
@@ -15,16 +15,13 @@ default: 'text'}
 \item{lang_col}{Name of the tweet variable containing the language to evaluate. It should be one of the following ("lang", "linked_lang", NA), default: "lang"}
 }
 \value{
-Dataframe containing the sampled tweets and the geolocation metrics
+Data frame containing the sampled tweets and the geolocation metrics
 }
 \description{
-Get a sample of today's tweets for evaluation of geolocation threshold
+This function was removed from epitweer v1.0.1 please use search_tweets instead
 }
 \details{
-This function will take a sample of tweets collected on the current date for testing the geolocation algorithm and giving the user the possibility to evaluate the optimal score.
-
-In order for this function to work the search loop will have had to run on the current day and the tasks \code{\link{download_dependencies}}, 
-\code{\link{update_geonames}} and \code{\link{update_languages}} will have had to successfully been run.
+This function was removed from epitweer v1.0.1 please use search_tweets instead.
 }
 \examples{
 if(FALSE){
@@ -43,6 +40,4 @@ if(FALSE){
  \code{\link{update_geonames}}
 
  \code{\link{update_languages}}
-
- \code{\link{geotag_tweets}}
 }

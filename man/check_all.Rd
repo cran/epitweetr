@@ -7,13 +7,13 @@
 check_all()
 }
 \value{
-Dataframe containing the statuses of all realized checks
+Data frame containing the statuses of all realized checks
 }
 \description{
-It runs a set of automated sanity checks for helping the user to troubleqhot issues
+It runs a set of automated sanity checks for helping the user to troubleshot issues
 }
 \details{
-This function executes a series of sanity checks, concerninr, java, bitness, task statusn dependencies and Twitter authentication.
+This function executes a series of sanity checks, concerning, Java, bitness, task status, dependencies and Twitter authentication.
 }
 \examples{
 if(FALSE){

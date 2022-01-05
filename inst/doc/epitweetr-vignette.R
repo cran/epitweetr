@@ -35,6 +35,9 @@ knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/ale
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/geotag_evaluation.png")
 
 ## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
+knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/data_protection.png")
+
+## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/config.png")
 
 ## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
@@ -55,24 +58,26 @@ knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/tro
 #  epitweetr_app("data_dir")
 
 ## ----echo=FALSE, fig.cap="", out.width = '50%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/run_geonames.png")
+knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/run_tasks.png")
 
-## ---- echo=FALSE, fig.cap="", out.width = '80%'-------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/Activate_tweet_search.png")
+## ---- eval=FALSE, echo=TRUE---------------------------------------------------
+#  library(epitweetr)
+#  fs_loop("data_dir")
 
 ## ---- eval=FALSE, echo=TRUE---------------------------------------------------
 #  library(epitweetr)
 #  search_loop("data_dir")
 
-## ----echo=FALSE, fig.cap="", out.width = '80%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/Detection_pipeline_activate.png")
+## ---- eval=FALSE, echo=TRUE---------------------------------------------------
+#  library(epitweetr)
+#  fs_loop("data_dir")
 
 ## ---- eval=FALSE, echo=TRUE---------------------------------------------------
 #  library(epitweetr)
 #  detect_loop("data_dir")
 
 ## ----echo=FALSE, fig.cap="", out.width = '50%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/Twitter_authentication_dev_app.png")
+knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/twitter_authentication.png")
 
 ## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/topics.png")
@@ -89,29 +94,8 @@ knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/Sea
 ## ----echo=FALSE, fig.cap="", out.width = '80%'--------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/config_languages.png")
 
-## ----echo=FALSE, fig.cap="", out.width = '50%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/geolocation_threshold.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/geolocated.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/country_counts.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/topwords.png")
-
 ## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/subscribers.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '40%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/search_folder.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '40%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/anthrax.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '50%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/series_folder.png")
 
 ## ---- eval=FALSE, echo=TRUE---------------------------------------------------
 #  epitweetr_app("data_dir")
@@ -146,14 +130,8 @@ knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/day
 ## ----echo=FALSE, fig.cap="", out.width = '30%'--------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/same_weekday_baseline.png")
 
-## ----echo=FALSE, fig.cap="", out.width = '100%'-------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/timeline.png")
-
 ## ----echo=FALSE, fig.cap="", out.width = '30%'--------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/hover_trendline.png")
-
-## ----echo=FALSE, fig.cap="", out.width = '60%'--------------------------------
-knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/map.png")
 
 ## ----echo=FALSE, fig.cap="", out.width = '60%'--------------------------------
 knitr::include_graphics("https://github.com/EU-ECDC/epitweetr/raw/master/img/hover_map.png")

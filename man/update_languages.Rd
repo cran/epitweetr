@@ -37,7 +37,7 @@ if(FALSE){
    message('Please choose the epitweetr data directory')
    setup_config(file.choose())
 
-   # geolocating last tweets
+   # updating language tasks
    tasks <- update_languages()
 }
 }

@@ -37,9 +37,5 @@ if(FALSE){
 
  \code{\link{detect_loop}}
  
- \code{\link{geotag_tweets}}
- 
- \code{\link{aggregate_tweets}}
-
  \code{\link{generate_alerts}}
 }

@@ -4,25 +4,38 @@
 \alias{get_aggregates}
 \title{Getting already aggregated time series produced by \code{\link{detect_loop}}}
 \usage{
-get_aggregates(dataset = "country_counts", cache = TRUE, filter = list())
+get_aggregates(
+  dataset = "country_counts",
+  cache = TRUE,
+  filter = list(),
+  top_field = NULL,
+  top_freq = NULL
+)
 }
 \arguments{
-\item{dataset}{A character(1) vector with the name of the series to request, it must be one of 'country_counts', 'geolocated' or 'topwords', default: 'country_counts'}
+\item{dataset}{A character(1) vector with the name of the series to request, it must be one of 'country_counts', 'geolocated', 'topwords', 'hashtags', 'entities', 'urls', 'contexts', default: 'country_counts'}
 
 \item{cache}{Whether to use the cache for lookup and storing the returned dataframe, default: TRUE}
 
-\item{filter}{A named list defining the filter to apply on the requested series, default: list()}
+\item{filter}{A named list defining the filter to apply on the requested series, it should be on the shape of a named list e.g. list(tweet_geo_country_code=list('FR', 'DE')) default: list()}
+
+\item{top_field}{Name of the top field used with top_frequency to enable optimisation for getting only most frequent elements. It will only keep top 500 items after first 50k lines on reverse index order}
+
+\item{top_freq}{character, Name of the frequency fields used with top_field to enable optimisation for getting only most frequent elements. 
+It will only keep top 500 items after first 50k rows on reverse index order}
 }
 \value{
-A dataframe containing the requested series for the requested period
+A data frame containing the requested series for the requested period
 }
 \description{
 Read and returns the required aggregated dataset for the selected period and topics defined by the filter.
 }
 \details{
-This function will look in the 'series' folder, which contains Rds files per weekday and type of series. It will parse the names of file and folders to limit the files to be read.
-Then it will apply the filters on each dataset for finally joining the matching results in a single dataframe.
-If no filter is provided all data series are returned, which can end up with millions of rows depending on the time series. 
+This function returns data aggregated by epitweetr. The data is found on the 'series' folder, which contains Rds files per weekday and type of series. 
+starting on v 1.0.x it will also look on Lucene indexes situated on fs folder. Names of files and folders are parsed to limit the files to be read.
+When using Lucene indexes, filters are directly applied on read. This is an improvement compared 'series' folder where filters are applied 
+after read. All returned rows are joined in a single dataframe.
+If no filter is provided all data series is returned, which can end up with millions of rows depending on the time series. 
 To limit by period, the filter list must have an element 'period' containing a date vector or list with two dates representing the start and end of the request.
 
 To limit by topic, the filter list must have an element 'topic' containing a non-empty character vector or list with the names of the topics to return.
@@ -31,7 +44,7 @@ The available time series are:
 \itemize{
   \item{"country_counts" counting tweets and retweets by posted date, hour and country}
   
-  \item{"geolocated" counting tweets and retweets by posted date and the smallest possible geolocated unit (city, adminitrative level or country)}
+  \item{"geolocated" counting tweets and retweets by posted date and the smallest possible geolocated unit (city, administrative level or country)}
   
   \item{"topwords" counting tweets and retweets by posted date, country and the most popular words, (this excludes words used in the topic search)}
 }
@@ -59,5 +72,5 @@ if(FALSE){
 }
 \seealso{
 \code{\link{detect_loop}}
- \code{\link{geotag_tweets}}
+ \code{\link{fs_loop}}
 }

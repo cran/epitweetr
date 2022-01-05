@@ -7,7 +7,7 @@
 generate_alerts(tasks = get_tasks())
 }
 \arguments{
-\item{tasks}{current tasks for reporting purposes, default: get_tasks()}
+\item{tasks}{Current tasks for reporting purposes, default: get_tasks()}
 }
 \value{
 The list of tasks updated with produced messages
@@ -43,8 +43,4 @@ if(FALSE){
 }
 \seealso{
 \code{\link{detect_loop}}
- 
- \code{\link{geotag_tweets}}
- 
- \code{\link{aggregate_tweets}}
 }

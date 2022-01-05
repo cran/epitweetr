@@ -14,7 +14,7 @@ If not provided the system will try to reuse the existing one from last session 
 The Shiny server object containing the launched application
 }
 \description{
-Open the epitweetr Shiny app, used to setup the search loop, the detect loop and to visualise the outputs.
+Open the epitweetr Shiny app, used to setup the Data collection & processing pipeline, the Requirements & alerts pipeline and to visualise the outputs.
 }
 \details{
 The epitweetr app is the user entry point to the epitweetr package. This application will help the user to setup the tweet collection process, manage all settings, 

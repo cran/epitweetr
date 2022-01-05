@@ -48,7 +48,7 @@ trend_line(
 \item{same_weekday_baseline}{Logical value indicating whether to use same day of weeks for building the baseline or consecutive days, default: FALSE}
 }
 \value{
-A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the dataframe that was used to build the chart.
+A named list containing two elements: 'chart' with the ggplot2 figure and 'data' containing the data frame that was used to build the chart.
 }
 \description{
 Generates a trendline chart of number of tweets by region, for one topic, including alerts using the reweighted version of the EARS algorithm
@@ -78,8 +78,6 @@ if(FALSE){
 \code{\link{create_map}}
  \code{\link{create_topwords}}
  \code{\link{generate_alerts}}
- \code{\link{aggregate_tweets}}
- \code{\link{geotag_tweets}}
  \code{\link{detect_loop}}
  \code{\link{search_loop}}
 }

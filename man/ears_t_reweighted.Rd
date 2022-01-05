@@ -55,5 +55,5 @@ if(FALSE){
 }
 }
 \author{
-Michael Höhle <https://www.math.su.se/~hoehle>
+Michael Hoehle <https://www.math.su.se/~hoehle>
 }

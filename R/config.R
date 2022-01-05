@@ -7,7 +7,7 @@ get_package_name <- function() environmentName(environment(setup_config))
 # Get the keyring for the provided backend or a platform dependent default if backend is null
 # this function is used to save the twitter and smtp credentials on a secure store when saving properties
 # this function uses the keyring R package which provides a common interface for accessing system dependent keyring
-# backend: backend name to use it will be guess based on user OS uf not defined.
+# backend: backend name to use it will be guessed based on user OS if not defined.
 get_key_ring <- function(backend = NULL) {
   if(!is.null(backend)) {
     Sys.setenv(kr_backend = backend)
@@ -52,7 +52,7 @@ set_secret <- function(secret, value) {
   get_key_ring()$set_with_value(service = Sys.getenv("kr_service"), username = secret, password = value)
 }
 
-# Checks weather a secret is set on the secret management backend
+# Checks whether a secret is set on the secret management backend
 is_secret_set <- function(secret) {
  secrets <- get_key_ring()$list(service =  Sys.getenv("kr_service")) 
  return(nrow(secrets[secrets$username == secret, ])>0) 
@@ -63,7 +63,7 @@ get_secret <- function(secret) {
   get_key_ring()$get(service =  Sys.getenv("kr_service"), username = secret)
 }
 
-# get empty config for initialization this represents default values for all configuration properties
+# get empty config for initialization, this represents default values for all configuration properties
 get_empty_config <- function(data_dir) {
   ret <- list()
   ret$keyring <- 
@@ -96,6 +96,7 @@ get_empty_config <- function(data_dir) {
     else all_cores
   }
   ret$spark_memory <- "4g"
+  ret$onthefly_api <-  .Platform$OS.type != "windows"
   ret$topics <- list()
   ret$topics_md5 <- ""
   ret$alert_alpha <- 0.025
@@ -117,6 +118,13 @@ get_empty_config <- function(data_dir) {
   ret$force_date_format <- ""
   ret$maven_repo <- "https://repo1.maven.org/maven2"
   ret$winutils_url <- "https://github.com/steveloughran/winutils/raw/master/hadoop-3.0.0/bin/winutils.exe"
+  ret$api_version <- "1.1"
+  ret$fs_port <- 8080
+  ret$fs_batch_timeout <- 60*60 
+  ret$fs_query_timeout <- 60
+  ret$admin_email <- ""
+  ret$dismiss_past_request <- "1971-01-01 00:00:00"
+  ret$dismiss_past_done <- "2000-01-01 00:00:00"
   return(ret)
 }
 
@@ -186,7 +194,7 @@ setup_config <- function(
   conf$data_dir <- data_dir
 
   # paths contains two files storing configuration data: 
-  # props which contains properties set on the shiny App is stored on data_dir/properties.json
+  # props which contains properties set on the Shiny App is stored on data_dir/properties.json
   # and data_dir/topics.json which stores search progress and is updated by the search loop
   paths <- list(props = get_properties_path(), topics = get_plans_path())
   
@@ -223,6 +231,7 @@ setup_config <- function(
     conf$known_users <- temp$known_users
     conf$spark_cores <- temp$spark_cores
     conf$spark_memory <- temp$spark_memory
+    conf$onthefly_api <- temp$onthefly_api
     conf$geolocation_threshold <- temp$geolocation_threshold
     conf$alert_alpha <- temp$alert_alpha
     conf$alert_alpha_outlier <- temp$alert_alpha_outlier
@@ -242,6 +251,13 @@ setup_config <- function(
     conf$force_date_format <- temp$force_date_format
     conf$maven_repo <- temp$maven_repo
     conf$winutils_url <- temp$winutils_url
+    conf$api_version <- temp$api_version
+    conf$fs_port <- temp$fs_port
+    conf$fs_batch_timeout <- temp$fs_batch_timeout
+    conf$fs_query_timeout <- temp$fs_query_timeout
+    conf$admin_email <- temp$admin_email
+    conf$dismiss_past_request <- temp$dismiss_past_request
+
   }
   if(!ignore_topics && exists("topics", where = paths)){
     # updating plans and topics if requested 
@@ -250,7 +266,7 @@ setup_config <- function(
       temp = merge_configs(list(temp, jsonlite::read_json(paths$topics, simplifyVector = FALSE, auto_unbox = TRUE)))
     }
     #Getting topics from excel topics files if it has changed since last load this is identified by checking the md5 signature
-    #If user has not ovewritten 
+    #If user has not overwritten 
     topics <- {
       t <- list()
       t$md5 <- as.vector(tools::md5sum(topics_path))
@@ -261,12 +277,12 @@ setup_config <- function(
     }
     
     #Merging topics from config json and topic excel topics if this last one has changed
-    #Each time a topic is found on file, all its occurrencies will be processed at the same time, to ensure consistent multi query topics updates based on position
+    #Each time a topic is found on file, all its occurrences will be processed at the same time, to ensure consistent multi query topics updates based on position
     if(exists("df", where = topics)) {
       distinct_topics <- as.list(unique(topics$df$Topic))
       adjusted_topics <- list()
       i_adjusted <- 1
-      #For each distinct topic on excel file
+      #For each distinct topic on Excel file
       for(i_topic in 1:length(distinct_topics)) {
         topic <- distinct_topics[[i_topic]]
         if(!grepl("^[A-Za-z_0-9][A-Za-z_0-9 \\-]*$", topic)) {
@@ -274,7 +290,7 @@ setup_config <- function(
         }
         i_tmp <- 1
         queries <- topics$df[topics$df$Topic == topic, ]
-        #For each distinct query on excel file on current topic
+        #For each distinct query on Excel file on current topic
         for(i_query in 1:nrow(queries)) {
           #Looking for the next matching entry in json file
           while(i_tmp <= length(temp$topics) && temp$topics[[i_tmp]]$topic != topic) { i_tmp <- i_tmp + 1 }
@@ -312,9 +328,10 @@ setup_config <- function(
       temp$topics_md5 <- topics$md5
     }
  
-    #Loading topic related infomation on config file 
+    #Loading topic related information on config file 
     conf$topics_md5 <- temp$topics_md5 
     conf$topics <- temp$topics
+    conf$dismiss_past_done <- temp$dismiss_past_done
     copy_plans_from(temp)  
   } 
   #Getting variables stored on keyring
@@ -387,7 +404,7 @@ copy_plans_from <- function(temp) {
 #' \code{\link{set_twitter_app_auth}}
 #' @export 
 save_config <- function(data_dir = conf$data_dir, properties= TRUE, topics = TRUE) {
-  # creating data directory if does nor exists
+  # creating data directory if it does not exists
   if(!file.exists(conf$data_dir)){
     dir.create(conf$data_dir, showWarnings = FALSE)
   }  
@@ -410,6 +427,8 @@ save_config <- function(data_dir = conf$data_dir, properties= TRUE, topics = TRU
     temp$known_users <- conf$known_users
     temp$spark_cores <- conf$spark_cores
     temp$spark_memory <- conf$spark_memory
+    temp$onthefly_api <- conf$onthefly_api
+    temp$geolocation_threshold <- conf$geolocation_threshold
     temp$geolocation_threshold <- conf$geolocation_threshold
     temp$alert_alpha <- conf$alert_alpha
     temp$alert_alpha_outlier <- conf$alert_alpha_outlier
@@ -430,6 +449,12 @@ save_config <- function(data_dir = conf$data_dir, properties= TRUE, topics = TRU
     temp$force_date_format <- conf$force_date_format
     temp$maven_repo <- conf$maven_repo
     temp$winutils_url <- conf$winutils_url
+    temp$api_version <- conf$api_version
+    temp$fs_port <- conf$fs_port
+    temp$fs_batch_timeout <- conf$fs_batch_timeout
+    temp$fs_query_timeout <- conf$fs_query_timeout
+    temp$admin_email <- conf$admin_email
+    temp$dismiss_past_request <- conf$dismiss_past_request
     # writing the json file
     write_json_atomic(temp, get_properties_path(), pretty = TRUE, force = TRUE, auto_unbox = TRUE)
   }
@@ -438,7 +463,8 @@ save_config <- function(data_dir = conf$data_dir, properties= TRUE, topics = TRU
     temp <- list()
     temp$topics <- conf$topics
     temp$topics_md5 <- conf$topics_md5
-    # Transforming Int64 to string to ensure not loosing precision on read
+    temp$dismiss_past_done <- conf$dismiss_past_done
+    # Transforming Int64 to string to ensure not losing precision on reading
     for(i in 1:length(conf$topics)) {         
       for(j in 1:length(conf$topics[[i]]$plan)) {
         temp$topics[[i]]$plan[[j]]$since_id = as.character(conf$topics[[i]]$plan[[j]]$since_id)
@@ -486,7 +512,7 @@ set_twitter_app_auth <- function(app, access_token, access_token_secret, api_key
   }
 }
 
-# Merging two or more configuration files as a list, lattest takes precedence ovef firsts
+# Merging two or more configuration files as a list, latest takes precedence over firsts
 merge_configs <- function(configs) {
   if(length(configs)==0)
     stop("No configurations provided for merge")
@@ -500,7 +526,7 @@ merge_configs <- function(configs) {
   }
 }
 
-# Get topics dataframe as displayed on the shinty configuration tab
+# Get topics data frame as displayed on the Shiny configuration tab
 get_topics_df <- function() {
   data.frame(
     Topics = sapply(conf$topics, function(t) t$topic), 
@@ -508,8 +534,8 @@ get_topics_df <- function() {
     Query = sapply(conf$topics, function(t) t$query), 
     QueryLength = sapply(conf$topics, function(t) nchar(t$query)), 
     ActivePlans = sapply(conf$topics, function(t) length(t$plan)), 
-    Progress = sapply(conf$topics, function(t) {if(length(t$plan)>0) mean(unlist(lapply(t$plan, function(p) p$progress))) else 0}), 
-    Requests = sapply(conf$topics, function(t) {if(length(t$plan)>0) sum(unlist(lapply(t$plan, function(p) p$requests))) else 0}),
+    Progress = sapply(conf$topics, function(t) {if(length(t$plan)>0) mean(unlist(lapply(t$plan, function(p) as.numeric(p$progress)))) else 0}), 
+    Requests = sapply(conf$topics, function(t) {if(length(t$plan)>0) sum(unlist(lapply(t$plan, function(p) as.numeric(p$requests)))) else 0}),
     Alpha = sapply(conf$topics, function(t) t$alpha),
     OutliersAlpha = sapply(conf$topics, function(t) t$alpha_outlier),
     stringsAsFactors=FALSE
@@ -565,7 +591,7 @@ get_topics_k_decays <- function() {
 }
 
 # Check config setup before continue
-stop_if_no_config <- function(error_message = "Cannot continue wihout setting up a configuration") {
+stop_if_no_config <- function(error_message = "Cannot continue without setting up a configuration") {
   if(!exists("data_dir", where = conf)) {
     stop("Cannot register please setup configuration")  
   }
@@ -578,7 +604,7 @@ setup_config_if_not_already <- function() {
   }
 }
 
-# Get current available languages from the available language excel file
+# Get current available languages from the available language Excel file
 get_available_languages <- function() {
   readxl::read_excel(get_available_languages_path()) 
 }
@@ -593,7 +619,7 @@ remove_config_language <- function(code) {
 
 # Add language on to the used languages on conf
 add_config_language <- function(code, name) {
-  # Timestaming action 
+  # Timestamping action 
   conf$lang_updated_on <- strftime(Sys.time(), "%Y-%m-%d %H:%M:%S")
   index <- (1:length(conf$languages))[sapply(conf$languages, function(l) l$code == code)]
   if(length(index)>0) {
@@ -603,7 +629,7 @@ add_config_language <- function(code, name) {
     conf$languages[[index]]$vectors=paste(conf$data_dir, "/languages/", code, ".txt.gz", sep = "")
     conf$languages[[index]]$modified_on <- strftime(Sys.time(), "%Y-%m-%d %H:%M:%S")
   } else {
-    # Language code is not the list
+    # Language code is not on the list
     conf$languages <- c(
       conf$languages,
       list(list(
@@ -616,7 +642,7 @@ add_config_language <- function(code, name) {
   } 
 }
 
-# Get current known users list from the important user files
+# Get current known users list from the important users files
 get_known_users <- function() {
   gsub("@", "", readxl::read_excel(get_known_users_path())[[1]])
 }
