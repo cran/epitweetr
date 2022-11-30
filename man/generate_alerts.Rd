@@ -20,7 +20,7 @@ This function calculates alerts for the last aggregated day and then send emails
 
 The alert calculation is based on the country_counts time series which stores alerts by country, hour and topics.
 
-For each country and region the process starts by aggregating the last N days. A day is a block of consecutive 24 hours ending before the hour of the collected last tweet. 
+For each country and region, the process starts by aggregating the last N days. A day is a block of consecutive 24 hours ending before the hour of the collected last tweet. 
 N is defined by the alert baseline parameter on the configuration tab of the Shiny application (the default is N=7).
 
 An alert will be produced when the number of tweets observed is above the threshold calculated by the modified version of the EARS algorithm (for more details see the package vignette). 

@@ -16,10 +16,10 @@ The list of tasks updated with produced messages
 Download Java dependencies of the application mainly related to Apache SPARK and Lucene,
 }
 \details{
-Run a one shot task consisting of downloading Java and Scala dependencies, this is separated by the following subtasks
+Run a one-shot task consisting of downloading Java and Scala dependencies, this is separated by the following subtasks
 \itemize{
   \item{Download jar dependencies from configuration maven repo to project data folder. This includes, scala, spark, lucene. Packages to be downloaded are defined in package file 'sbt-deps.txt'}
-  \item{Download winutils from configuration url to project data folder. For more details on winutils please see 
+  \item{Download winutils from configuration URL to project data folder. For more details on winutils please see 
     \url{https://issues.apache.org/jira/browse/HADOOP-13223} and \url{https://issues.apache.org/jira/browse/HADOOP-16816}
   }
 }

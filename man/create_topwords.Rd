@@ -41,7 +41,7 @@ For performance reasons on tweet aggregation this report only shows tweet locati
 
 This report may be empty for combinations of countries and topics with very few tweets since for performance reasons, the calculation of top words is an approximation using chunks of 10.000 tweets.
 
-This functions requires that \code{\link{search_loop}} and \code{\link{detect_loop}} have already been run successfully to show results.
+This function requires that \code{\link{search_loop}} and \code{\link{detect_loop}} have already been run successfully to show results.
 }
 \examples{
 if(FALSE){

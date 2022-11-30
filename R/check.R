@@ -120,7 +120,7 @@ check_64 <- function() {
 
 # check msvcr100 on Windows machines
 check_winmsvcr100 <- function() {
-  #inspired from sparklyr https://github.com/sparklyr/sparklyr/blob/master/R/install_spark_windows.R
+  # inspired from sparklyr https://github.com/sparklyr/sparklyr/blob/master/R/install_spark_windows.R
   if(.Platform$OS.type == "windows") {
     systemRoot <- Sys.getenv("SystemRoot")
     systemDir <- "system32"
@@ -141,13 +141,13 @@ check_winmsvcr100 <- function() {
   
 }
 
-#check winutils is installed
+# check winutils is installed
 check_winutils <- function() {
   if(.Platform$OS.type == "windows") {
     if(file.exists(get_winutils_path()))
       TRUE
     else {
-      warning("To run SPARK on Windows you need winutils which is a HADOOP binary, you can download it by running the update dependencies task")  
+      warning("To run SPARK on Windows you need winutils which is a HADOOP binary. You can download it by running the update dependencies task")  
       FALSE
     }
   } else {
@@ -155,7 +155,7 @@ check_winutils <- function() {
   }
 }
 
-#check download Java dependencies has been executed
+# check download Java dependencies has been executed
 check_java_deps <- function() {
   if(!dir.exists(get_jars_dest_path())) {
     warning("epitweetr needs the dependencies task to run and download all Java dependencies")
@@ -174,10 +174,10 @@ check_java_deps <- function() {
   }
 }
 
-#check geonames is downloaded and indexed
+# check geonames is downloaded and indexed
 check_geonames <- function() {
   if(!file.exists(get_geonames_txt_path())) {
-    warning("epitweetr needs geonames to be downloaded and unzipped for geolocating tweets. Please run the geonames task of the requirements and alert pipeline")
+    warning("epitweetr needs GeoNames to be downloaded and unzipped for geolocating tweets. Please run the GeoNames task of the requirements and alert pipeline")
     FALSE
   } else {
     dir <- get_geonames_index_path()
@@ -203,11 +203,11 @@ check_geonames <- function() {
 }
 
 
-#check that languages are downloaded and indexed
+# check that languages are downloaded and indexed
 check_languages <- function() {
   lang_files <- sapply(conf$languages, function(l) l$vectors)
   if(length(lang_files) == 0 || !all(sapply(lang_files, function(f) file.exists(f)))) {
-    warning("epitweetr needs languages models to be downloaded for geolocating tweets. Please activate some languages and launch the languages task")
+    warning("epitweetr needs languages models to be downloaded for geolocating tweets. Please activate at least one language and launch the languages task")
     FALSE  
   } else {
     dir <- get_lang_index_path()
@@ -226,7 +226,7 @@ check_languages <- function() {
     if(ret)
       TRUE
     else {
-      warning("Language vector index has not been built. Please activate some languages and launch the languages task")
+      warning("Language vector index has not been built. Please activate at least one language and launch the languages task")
       FALSE
     }
   }
@@ -324,7 +324,7 @@ check_search_running <- function() {
     TRUE
   else {
     warning(paste0(
-      "Data collection & processing pipeline is not running. On Windows, you can activate it by clicking on the 'activate' Data collection & processing button on the config page ",
+      "Data collection & processing pipeline is not running. On Windows, you can activate it by clicking on the 'activate' Data collection & processing button on the configuration page ",
       "You can also manually run the Data collection & processing pipeline by executing the following command on a separate R session. epitweetr::search_loop('",
       conf$data_dir,
       "')"
@@ -339,7 +339,7 @@ check_fs_running <- function() {
     TRUE
   else {
     warning(paste0(
-      "Embedded epitweetr database is not running. On Windows, you can activate it by clicking on the 'activate' epitweetr database button on the config page ",
+      "Embedded epitweetr database is not running. On Windows, you can activate it by clicking on the 'activate' epitweetr database button on the configuration page ",
       "You can also manually run the Data collection & processing pipeline by executing the following command on a separate R session. epitweetr::search_loop('",
       conf$data_dir,
       "')"
@@ -354,7 +354,7 @@ check_detect_running <- function() {
     TRUE
   else {
     warning(paste0(
-      "Requirements & alerts pipeline is not running. On Windows, you can activate it by clicking on the 'activate' Requirements & alerts button on the config page ",
+      "Requirements & alerts pipeline is not running. On Windows, you can activate it by clicking on the 'activate' Requirements & alerts button on the configuration page ",
       "You can also manually run the Requirements & alerts pipeline by executing the following command on a separate R session. epitweetr::detect_loop('",
       conf$data_dir,
       "')"
@@ -369,7 +369,7 @@ check_fs_running <- function() {
     TRUE
   else {
     warning(paste0(
-      "Embedded database is not running. On Windows, you can activate it by clicking on the 'activate' database service button on the config page ",
+      "Embedded database is not running. On Windows, you can activate it by clicking on the 'activate' database service button on the configuration page ",
       "You can also manually run the fs service by executing the following command on a separate R session. epitweetr::fs_loop('",
       conf$data_dir,
       "')"
@@ -382,14 +382,19 @@ check_fs_running <- function() {
 last_check_twitter_auth <- new.env()
 
 check_twitter_auth <- function() {
-  token <- get_token(request_new = FALSE)
-  ok <- "Token" %in% class(token) || "bearer" %in% class(token)
-  last_check_twitter_auth$value <- ok
+  ok <- tryCatch({
+     token <- get_token(request_new = FALSE)
+     ok <- "Token" %in% class(token) || "bearer" %in% class(token) || is.character(token)
+     last_check_twitter_auth$value <- ok
+     ok
+    }, 
+    warning = function(m) {FALSE}, 
+    error = function(e) { FALSE }
+  ) 
   if(ok)
     TRUE 
   else {
     warning("Cannot create a Twitter token, please choose an authentication method on the configuration page")
-    FALSE
   }
 }
 check_last_twitter_auth <- function() {
@@ -434,9 +439,53 @@ check_move_from_temp <- function() {
     TRUE 
   else {
     warning(paste(
-      "Cannot move files from temporary folder to data dir, possible cross link device.",
+      "Cannot move files from temporary folder to data_dir, possible cross link device.",
       "Please set TMPDIR, TMP or TEMP environment variable to the same drive as the data folder",
       conf$data_dir))
+    FALSE
+  }
+}
+
+
+
+# can tar gz
+check_tar_gz <- function() {
+  ok <- tryCatch({
+      temp <- tempdir()
+      p <- file.path(temp, "test")
+      pgz <- file.path(temp, "test.tar.gz")
+      fileConn<-file(p)
+      writeLines(c("hello temp"), fileConn)
+      close(fileConn)
+      
+      result = tryCatch(
+        {
+          processx::run(
+             "tar", 
+             c("-czf", normalizePath(pgz, winslash = "/", mustWork=FALSE), normalizePath(p, winslash = "/"), "--force-local"),
+             wd = temp
+          )
+        }, error = function(e) {
+          processx::run(
+             "tar", 
+             c("-czf", normalizePath(pgz, winslash = "/", mustWork=FALSE), normalizePath(p, winslash = "/")),
+             wd = temp
+          )
+        }
+      )
+  
+      TRUE
+    }, 
+    warning = function(m) {FALSE}, 
+    error = function(e) { FALSE }
+  ) 
+  if(ok)
+    TRUE 
+  else {
+    warning(paste(
+      "Cannot built tar.gz. Please ensure Tar and Gzip are available in the system path and make sure you can execute 'tar -czf test.tar.gz somefile' on a terminal.",
+      "Latest Windows 10 versions may include these tools, otherwise, you would need to install them to create snapshots."
+    ))
     FALSE
   }
 }
@@ -477,6 +526,7 @@ check_all <- function() {
     winutils = check_winutils, 
     java_deps = check_java_deps, 
     move_from_temp = check_move_from_temp, 
+    tar_gz = check_tar_gz, 
     geonames = check_geonames, 
     languages = check_languages, 
     aggregate = check_series_present, 
@@ -495,18 +545,18 @@ check_all <- function() {
   data.frame(check = names(checks), passed = results == "ok", message = ifelse(results == "ok", "", results))  
 }
 
-#Environment for storing last admin email
+# Environment for storing last admin email
 checks <- new.env()
 
 #' @title Send email to administrator if a failure of epitweetr is detected 
 #' @description It validates if epitweetr is not collecting tweets, aggregating tweets or not calculating alerts
-#' @param send_mail Boolean. Whether an email should be sent to the defined administrator , default: TRUE
+#' @param send_mail Boolean. Whether an email should be sent to the defined administrator, default: TRUE
 #' @param one_per_day Boolean. Whether a limit of one email per day will be applied, default: TRUE
 #' @return A list of health check errors found 
 #' @details This function sends an email to the defined administrator if epitweetr is not collecting tweets, aggregating tweets or not calculating alerts
 #' @examples 
 #' if(FALSE){
-#'    #importing epitweer
+#'    #importing epitweetr
 #'    library(epitweetr)
 #'    message('Please choose the epitweetr data directory')
 #'    setup_config(file.choose())
@@ -551,7 +601,7 @@ health_check <- function(send_mail = TRUE, one_per_day = TRUE) {
 
     # Check 05: if any task is on aborted status
     for(i in 1:length(tasks)) {
-      if(tasks[[i]]$status == "aborted") {
+      if(!is.na(tasks[[i]]$status) && tasks[[i]]$status == "aborted") {
         alerts <- append(alerts, paste("Task,", tasks[[i]]$task, "is on aborted status"))
       }
     }
@@ -577,10 +627,214 @@ health_check <- function(send_mail = TRUE, one_per_day = TRUE) {
           emayili::server(host = conf$smtp_host, port=conf$smtp_port, username=conf$smtp_login, insecure=conf$smtp_insecure, password=conf$smtp_password, reuse = FALSE)
       )
       message("Health check failed, sending email")
-      smtp(msg)
+      tryCatch(smtp(msg), error = function(e) message(paste("Warning: Cannot send email. The following error occured", e)))
+      
       checks$last_check <- Sys.time()
     }
   }
   alerts
 }
+
+update_session_info <- function() {
+  con <- file(get_session_info_path())
+  writeLines(utils::capture.output(utils::sessionInfo()), con)
+  close(con)
+}
+
+
+#' @title Snapshot of your epitweetr installation
+#' @description Creates a snapshot file of your epitweetr installation folder. This can include all or a subset of the data files.
+#' @param destination_dir, character(1) vector with the path of the destination folder to produce the snapshot
+#' @param types, character vector indicating the types of data to include on a snapshot. Some of: "settings", "dependencies", "machine-learning", "aggregations", "tweets", "logs"
+#' @param tweets_period, date(2) start and end dates to filter tweets to include on snapshot (if selected)
+#' @param aggregated_period, date(2) start and end dates to filter time series to include on snapshot (if selected)
+#' @param compress, logical(1) whether to compress or not the output file
+#' @param progress, function to report progress during execution.
+#' @return Nothing
+#' @details 
+#' This function can be used to create a a portable file to move your epitweetr installation in a single file, to backup your data, to archive your old data or to send information to technical team in order to reproduce an observed issue.
+#' Different kinds of data can be included on the snapshot depending on the type of parameter. Possible values are:
+#' - 'settings': Including all setting files of your installation (excluding passwords)
+#' - 'dependencies': All jars and winutils.exe on windows installations
+#' - 'machine-learning': All trained models and vectors and training data (this can include tweet text which is personal data)
+#' - 'aggregations': Epitweetr aggregated time series
+#' - 'tweets': Tweets collected by epitweetr
+#' - 'logs': Log files produced automatically on windows task scheduler tasks.
+#' @examples 
+#' if(FALSE){
+#'    #importing epitweer
+#'    library(epitweetr)
+#'    message('Please choose the epitweetr data directory')
+#'    setup_config(file.choose())
+#'    #creating a compressed snapshot for settings and logs
+#'    create_snapshot(getwd(), c("settings","dependencies"), compress = TRUE)
+#' }
+#' @rdname create_snapshot
+#' @export 
+create_snapshot <- function(
+  destination_dir, 
+  types = c("settings", "dependencies", "machine-learning", "aggregations", "tweets", "logs"), 
+  tweets_period = get_aggregated_period(), 
+  aggregated_period = get_aggregated_period(),
+  compress = TRUE,
+  progress = function(v, m) message(paste(round(v*100, 2), m))
+) {
+  destination <- normalizePath(file.path(destination_dir, paste0("epitweetr-snapshot",strftime(Sys.time(), "%Y.%m.%d-%H.%M.%S"), if(compress) ".tar.gz" else ".tar")), winslash = "/", mustWork = FALSE)
+  update_session_info()
+  items = list()
+    if("settings" %in% types)
+      items <- c(
+        items,
+        list(
+          "properties.json" = get_properties_path(),
+          "topics.xlsx" = get_topics_path(),
+          "tasks.json" = get_tasks_path(),
+          "subscribers.xlsx" = get_subscribers_path(),
+          "countries.xlsx" = get_countries_path(),
+          "users.xlsx" = get_known_users_path(),
+          "languages.xlsx" = get_available_languages_path(),
+          "topics.json" = get_plans_path(),
+          "topic-keywords.json" = get_topic_keywords_path(),
+          "session-info.log" = get_session_info_path() 
+        ),
+        epitweetr_files("collections")
+      )
+    if("dependencies" %in% types)
+      items <- c(
+        items,
+        list(
+          "hadoop/bin/winutils.exe" = get_winutils_path()
+        ),
+        as.list(setNames(list.files(get_jars_dest_path(), full.names = TRUE), file.path("jars", list.files(get_jars_dest_path()))))
+      )
+    if("machine-learning" %in% types) 
+      items <- c(
+        items,
+        list(
+          "alert-training.xlsx" = get_alert_training_path(),
+          "geo-training.xlsx" = get_geotraining_path(),
+          "geo-training-evaluation.json" = get_geotraining_evaluation_path(),
+          "geo/forced-geo.json" = get_forced_geo_path(),
+          "geo/forced-geo-codes.json" = get_forced_geo_codes_path(),
+          "geo/allCountries.txt" = get_geonames_txt_path()
+        ),
+        epitweetr_files(get_cities_parquet_path(relative = TRUE)),
+        epitweetr_files(get_geonames_parquet_path(relative = TRUE)),
+        epitweetr_files(get_geonames_index_path(relative = TRUE)),
+        epitweetr_files(get_lang_index_path(relative = TRUE)),
+        epitweetr_files(get_lang_index_path(relative = TRUE)),
+        epitweetr_files("languages"),
+        epitweetr_files("alert-ml")
+      )
+    if("aggregations" %in% types)
+      items <- c(
+        items,
+        epitweetr_files("alerts", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/contexts", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/country_counts", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/entities", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/geolocated", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/hashtags", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/topwords", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("fs/urls", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("series", aggregated_period[[1]], aggregated_period[[2]]),
+        epitweetr_files("stats", aggregated_period[[1]], aggregated_period[[2]])
+      )
+    if("tweets" %in% types) 
+      items <- c(
+        items,
+        list(
+          "geo/togeolocate.json" = get_tweet_togeo_path(),
+          "geo/geolocating.json" = get_tweet_geoing_path(),
+          "geo/toaggregate.json" = get_tweet_toaggr_path(),
+          "geo/aggregating.json" = get_tweet_aggring_path()
+        ),
+        epitweetr_files("fs/tweets", tweets_period[[1]], tweets_period[[2]])
+      )
+    if("logs" %in% types)
+      items <- c(
+        items,
+        list(
+          "detect.log" = "~/epitweetr/detect.log",
+          "fs.log" = "~/epitweetr/fs.log",
+          "search.log" = "~/epitweetr/search.log"
+        )
+      )
+  nb <- length(items)
+  i <- 0
+  progress(0, paste("Building archive for", nb, "files"))
+  last_message <- as.integer(Sys.time())
+  oldwd <- getwd()
+  on.exit(setwd(oldwd))
+  setwd(conf$data_dir)
+
+  # adding files from external folders to ensure portability
+  to_copy <- file.exists(unlist(items)) & (!file.exists(names(items)) | names(items) %in% c("detect.log", "fs.log", "search.log"))
+  if(length(to_copy)>0) {
+    file.copy(unlist(items[to_copy]), names(items)[to_copy])
+  }
+
+  # creating list of files to add
+  to_arc <- normalizePath(tempfile("toarc"), winslash = "/", mustWork = FALSE)
+  to_arc_con <- file(to_arc, "wb", encoding = "UTF-8" )
+  fnames <- normalizePath(names(items), winslash = "/", mustWork = FALSE)
+  writeLines(fnames[file.exists(fnames)], sep = "\n", to_arc_con)
+  close(to_arc_con)
+
+  
+  # launching the compression as a background process
+  cb <- function(line, proc) {
+    i <<- i + 1
+    if(as.integer(Sys.time()) - last_message > 2) {
+      progress(1.0*i/nb, paste("Building archive for", i, "of" , nb, "files"))
+      last_message <<- as.integer(Sys.time())
+    }
+  }
+ 
+  result = tryCatch(
+    {
+      processx::run(
+        "tar", 
+        c(if(compress) "-czvf" else "-cvf", destination, "-T", to_arc, "--force-local"),
+        stdout_line_callback = cb,
+        wd = conf$data_dir
+      )
+    }, error = function(e) {
+      processx::run(
+        "tar", 
+        c(if(compress) "-czvf" else "-cvf", destination, "-T", to_arc),
+        stdout_line_callback = cb,
+        wd = conf$data_dir
+      )
+    }
+  )
+
+}
+
+epitweetr_files <- function(rel_path, dmin = NULL, dmax = NULL) {
+  if(!is.null(dmin) && is.na(dmin))
+    dmin <- NULL
+  if(!is.null(dmax) && is.na(dmax))
+    dmax <- NULL
+  ret = list()
+  dirs <- list.dirs(file.path(conf$data_dir, rel_path), full.names= FALSE)
+  rel_dirs <- ifelse(dirs == "", rel_path, file.path(rel_path, dirs)) 
+
+  for(d in rel_dirs ) {
+      f <- file.path(conf$data_dir, d)
+      file_names <- setdiff(list.files(f), list.dirs(f, recursive = FALSE, full.names = FALSE))
+      files <- as.list(setNames(file.path(conf$data_dir,  d, file_names), file.path(d, file_names)))
+      dates <- as.Date(strptime(regmatches(names(files),gregexpr("[0-9][0-9][0-9][0-9]\\.[0-9][0-9]\\.[0-9][0-9]",names(files))),  "%Y.%m.%d"))
+      fd <- ifelse(sapply(dates, function(v) is.null(dmin)), TRUE, ifelse(is.na(dates), FALSE, dates >= dmin)) & ifelse(sapply(dates, function(v) is.null(dmax)), TRUE, ifelse(is.na(dates), FALSE, dates <= dmax))
+      weeks <- regmatches(names(files),gregexpr("[0-9][0-9][0-9][0-9]\\.[0-9][0-9]",names(files)))
+      weeks <- ifelse(is.na(dates), weeks, NA)
+      wmin = if(is.null(dmin)) NULL else strftime(dmin, "%G.%V")
+      wmax = if(is.null(dmax)) NULL else strftime(dmax, "%G.%V")
+      fw <- ifelse(sapply(weeks, function(v) is.null(wmin)), TRUE, ifelse(is.na(weeks), FALSE, weeks >= wmin)) & ifelse(sapply(weeks, function(v) is.null(wmax)), TRUE, ifelse(is.na(weeks), FALSE, weeks <= wmax))
+      ret <- c(ret, files[fd | fw])
+  }
+  ret
+}
+
+
 

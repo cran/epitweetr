@@ -5,11 +5,12 @@
 \title{Save Twitter App credentials}
 \usage{
 set_twitter_app_auth(
-  app,
-  access_token,
-  access_token_secret,
-  api_key,
-  api_secret
+  app = "",
+  access_token = "",
+  access_token_secret = "",
+  api_key = "",
+  api_secret = "",
+  bearer = ""
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ set_twitter_app_auth(
 \item{api_key}{API key as provided by Twitter}
 
 \item{api_secret}{API secret as provided by Twitter}
+
+\item{bearer}{the bearer token of the application}
 }
 \value{
 Nothing
@@ -41,6 +44,9 @@ if(FALSE){
      access_token_secret = "123456", 
      api_key = "123456", 
      api_secret = "123456"
+   )
+   set_twitter_app_auth(
+     bearer = "123456"
    )
 }
 }

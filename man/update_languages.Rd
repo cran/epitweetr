@@ -4,7 +4,7 @@
 \alias{update_languages}
 \title{Updates local copies of languages}
 \usage{
-update_languages(tasks)
+update_languages(tasks = get_tasks())
 }
 \arguments{
 \item{tasks}{Tasks object for reporting progress and error messages, default: get_tasks()}

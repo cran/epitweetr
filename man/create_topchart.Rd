@@ -42,8 +42,6 @@ Generates a bar plot of most popular elements in tweets, for one topic. Top elem
 Produces a bar chart showing the occurrences of the most popular words in the collected tweets based on the provided parameters.
 For performance reasons on tweet aggregation, this report only shows tweet location and ignores the location_type parameter
 
-This report may be empty for combinations of countries and topics with very few tweets since for performance reasons, the calculation of top words is an approximation using chunks of 10.000 tweets.
-
 This functions requires that \code{\link{search_loop}} and \code{\link{detect_loop}} have already been run successfully to show results.
 }
 \examples{

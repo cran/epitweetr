@@ -10,11 +10,11 @@ register_fs_monitor()
 Nothing
 }
 \description{
-registers the fs_monitor (by writing detect.PID file) for the current process or stops if no configuration has been set or if it is already running
+registers the fs_monitor (by writing fs.monitor.PID file) for the current process or stops if no configuration has been set or if it is already running
 }
 \details{
-Registers the fs_monitor (by writing detect.PID file) for the current process or stops if no configuration has been set or if it is already running
-this function is exported so it can be called nicely from using the future package, but it is not intended to be directly used by users
+Registers the fs_monitor (by writing fs.monitor.PID file) for the current process or stops if no configuration has been set or if it is already running
+This function has been exported so it can be properly called from the future package on the database runner, but it is not intended to be directly called by end users.
 }
 \examples{
 if(FALSE){

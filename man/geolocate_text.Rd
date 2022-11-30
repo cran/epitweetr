@@ -22,7 +22,7 @@ A new data frame containing the following geolocation columns: geo_code, geo_cou
 extracts geolocaion information on text on a column of the provided data frame and returns a new data frame with geolocation information
 }
 \details{
-This functions perform a call to the epitweetr database which includes functionality for geolocating for languages activated and successfully processed on the shiny app.
+This function perform a call to the epitweetr database which includes functionality for geolocating for languages activated and successfully processed on the shiny app.
 
 The geolocation process tries to find the best match in GeoNames database \url{https://www.geonames.org/} including all local aliases for words.
 
@@ -40,14 +40,14 @@ A prerequisite to this function is that the tasks \code{\link{download_dependenc
 This function is called from the Shiny app on geolocation evaluation tab but can also be used for manually evaluating the epitweetr geolocation algorithm.
 }
 \examples{
-if(FALSE){
+if(FALSE) {
    library(epitweetr)
    # setting up the data folder
    message('Please choose the epitweetr data directory')
    setup_config(file.choose())
 
    # creating a test dataframe
-   df <- data.frame(text = c("Viva Santiago es el mejor lugar del mundo"), lang = c("es"))
+   df <- data.frame(text = c("Me gusta Santiago de Chile es una linda ciudad"), lang = c("es"))
    geo <- geolocate_text(df = df, text_col = "text", lang_col="lang") 
    
 }

@@ -7,7 +7,7 @@
 health_check(send_mail = TRUE, one_per_day = TRUE)
 }
 \arguments{
-\item{send_mail}{Boolean. Whether an email should be sent to the defined administrator , default: TRUE}
+\item{send_mail}{Boolean. Whether an email should be sent to the defined administrator, default: TRUE}
 
 \item{one_per_day}{Boolean. Whether a limit of one email per day will be applied, default: TRUE}
 }
@@ -22,7 +22,7 @@ This function sends an email to the defined administrator if epitweetr is not co
 }
 \examples{
 if(FALSE){
-   #importing epitweer
+   #importing epitweetr
    library(epitweetr)
    message('Please choose the epitweetr data directory')
    setup_config(file.choose())

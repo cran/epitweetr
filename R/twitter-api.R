@@ -15,28 +15,57 @@ search_endpoint <-  list(
 
 # Get twitter token bases on configuration based on configuration settings (app or user)
 # This function is called when saving properties on shiny app and first time epitweetr performs a twitter search in a session
-# request_new: I
+# request_new: Whether to force creating a new token
 get_token <- function(request_new = TRUE) {
-  if(exists("access_token", where = conf$twitter_auth) && conf$twitter_auth$access_token!="") {  
-    # Creating a new app token if app authentication is set
-    # Removing existing rtweet token if exists
-    if(file.exists("~/.rtweet_token.rds")) file.remove("~/.rtweet_token.rds")
-    # Using rtweet call to create token
-    token <- rtweet::create_token(
-      app = conf$twitter_auth$app
-      , consumer_key =conf$twitter_auth$api_key
-      , consumer_secret =conf$twitter_auth$api_secret
-      , access_token =conf$twitter_auth$access_token
-      , access_secret = conf$twitter_auth$access_token_secret)
-    # Removing user context
-    token <- rtweet::bearer_token(token)
+  token_path <- "~/.rtweet_token.rds"
+  new_rtweet <- exists("rtweet_user", base::asNamespace("rtweet"))
+  if(exists("access_token", where = conf$twitter_auth )) {
+    if(new_rtweet && (conf$twitter_auth$access_token != "" || conf$twitter_auth$bearer == ""))
+      stop("It seems you have updated the rtweet package. You need to reset the twitteer authentication using your app bearer token, fallback to user authentication or downgrade rtweet")
+    else 
+      conf$twitter_auth_mode == "app"
+  }
+  # An app token is requested
+  if(conf$twitter_auth_mode == "app") {  
+    # if new rtweet then we just provide the registered bearer
+    if(new_rtweet)
+      token <- conf$twitter_auth$bearer
+    # if not requesting a new one and a non null token is already available on the configuration (because used) then we get it from conf
+    else if(!request_new && exists("token", where = conf) && !is.null(conf$token)) 
+      token <- conf$token
+    # if not requesting new and an available token is written on disk
+    else if(!request_new && file.exists(token_path)) {
+      token <- readRDS(token_path)
+      if(!("bearer" %in% class(conf$token)))
+        token <- rtweet::bearer_token(token)
+    }
+    # In other cases we get a new token using rtweet
+    else {
+      if(file.exists(token_path)) 
+        file.remove(token_path)
+      token <- rtweet::create_token(
+        app = conf$twitter_auth$app
+        , consumer_key =conf$twitter_auth$api_key
+        , consumer_secret =conf$twitter_auth$api_secret
+        , access_token =conf$twitter_auth$access_token
+        , access_secret = conf$twitter_auth$access_token_secret
+      )
+      # Removing user context
+      token <- rtweet::bearer_token(token)
+    } 
   } else {
     # Using delegated authentication otherwise, token will be reused if it exists and new one will be requested if it is not set
     token <- (
        if(interactive() && request_new)
-         rtweet::get_token()
-       else if(file.exists("~/.rtweet_token.rds")){
-         readRDS("~/.rtweet_token.rds")
+         if(new_rtweet) {
+           # new version of rtweet detected using new function
+           t <- rtweet::rtweet_user()
+           saveRDS(t, token_path)
+           t
+         } else
+           rtweet::get_token()
+       else if(file.exists(token_path)){
+         readRDS(token_path)
        } else if(request_new){
          stop("Cannot get a token on an non interactive session. Create it from configuration page first")
        } else 
@@ -75,6 +104,8 @@ twitter_get <- function(urls, i = 0, retries = 20, tryed = list()) {
           url
           , if("bearer" %in% class(conf$token)) 
               httr::add_headers(Authorization = paste("Bearer", attr(conf$token, "bearer")$access_token, sep = " "))
+            else if(is.character(conf$token)) 
+              httr::add_headers(Authorization = paste("Bearer", conf$token, sep = " "))
             else 
               httr::config(token = conf$token)
         )

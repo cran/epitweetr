@@ -24,7 +24,7 @@ The loop report progress on the 'tasks.json' file which is read or created by th
 
 The recurrent tasks are scheduled to be executed each 'detect span' minutes, which is a parameter set on the Shiny app.
 
-If any of these tasks fails it will be retried three times before going to a abort status. Aborted tasks can be relaunched from the Shiny app.
+If any of these tasks fails it will be retried three times before going to abort status. Aborted tasks can be relaunched from the Shiny app.
 }
 \examples{
 if(FALSE){

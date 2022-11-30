@@ -2,7 +2,7 @@
 % Please edit documentation in R/geo-tagging.R
 \name{get_todays_sample_tweets}
 \alias{get_todays_sample_tweets}
-\title{Get a sample of latest tweet geolocations (removed)}
+\title{Get a sample of latest tweet geolocations (deprecated)}
 \usage{
 get_todays_sample_tweets(limit = 1000, text_col = "text", lang_col = "lang")
 }
@@ -18,10 +18,10 @@ default: 'text'}
 Data frame containing the sampled tweets and the geolocation metrics
 }
 \description{
-This function was removed from epitweer v1.0.1 please use search_tweets instead
+This function was removed from epitweetr v1.0.1. Please use search_tweets instead
 }
 \details{
-This function was removed from epitweer v1.0.1 please use search_tweets instead.
+This function was removed from epitweetr v1.0.1. Please use search_tweets instead.
 }
 \examples{
 if(FALSE){

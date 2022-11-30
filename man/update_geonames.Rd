@@ -4,7 +4,7 @@
 \alias{update_geonames}
 \title{Updates the local copy of the GeoNames database}
 \usage{
-update_geonames(tasks)
+update_geonames(tasks = get_tasks())
 }
 \arguments{
 \item{tasks}{Tasks object for reporting progress and error messages, default: get_tasks()}
