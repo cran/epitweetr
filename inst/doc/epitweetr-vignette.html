@@ -15,6 +15,35 @@
 
 <title>epitweetr: user documentation</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -26,36 +55,29 @@
     </style>
 
 
-
-<style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
-</style>
+<style type="text/css">code{white-space: pre;}</style>
 <style type="text/css" data-origin="pandoc">
-a.sourceLine { display: inline-block; line-height: 1.25; }
-a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
-a.sourceLine:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 div.sourceCode { margin: 1em 0; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-a.sourceLine { text-indent: -1em; padding-left: 1em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
-pre.numberSource a.sourceLine
-  { position: relative; left: -4em; }
-pre.numberSource a.sourceLine::before
-  { content: attr(title);
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
     position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; pointer-events: all; display: inline-block;
+    border: none; display: inline-block;
     -webkit-touch-callout: none; -webkit-user-select: none;
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
@@ -64,9 +86,9 @@ pre.numberSource a.sourceLine::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  {  }
+  {   }
 @media screen {
-a.sourceLine::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -366,7 +388,7 @@ Fig 6: Shiny app troubleshoot page
 <p>Article 3 of the European Centre for Disease Prevention and Control (ECDC) funding regulation and the Decision No 1082/2013/EU on serious cross-border threats to health have established the detection of public health threats as a core activity of ECDC.</p>
 <p>ECDC performs Epidemic Intelligence (El) activities aiming at rapidly detecting and assessing public health threats, focusing on infectious diseases, to ensure EU’s health security. ECDC uses social media as part of its sources to early detect signals of public health threats. Until 2020, the monitoring of social media was mainly performed through the screening and analysis of posts from pre-selected experts or organisations, mainly in Twitter and Facebook.</p>
 <p>More information and an online tutorial are available:</p>
-<p><a href="https://www.ecdc.europa.eu/en/about-us/what-we-do/ecdc-activities-epidemic-intelligence-and-outbreak-response">EI sources</a></p>
+<p><a href="https://www.ecdc.europa.eu/en/training-and-tools/surveillance-and-outbreak-tools/information-sources-epidemic-intelligence-and">EI sources</a></p>
 <p><a href="https://eva.ecdc.europa.eu/enrol/index.php?id=519">EI tutorial</a></p>
 </div>
 <div id="monitoring-social-media-trends" class="section level3">
@@ -460,7 +482,7 @@ Fig 6: Shiny app troubleshoot page
 <li><p>Machine learning optimisation (only for advanced users)</p>
 <ul>
 <li><p>Open Blas (BLAS optimizer), which will speed up some of the geolocation processes: <a href="https://www.openblas.net/"><em>https://www.openblas.net/</em></a> Installation instructions: <a href="https://github.com/fommil/netlib-Java"><em>https://github.com/fommil/netlib-Java</em></a></p></li>
-<li><p><strong>or</strong> Intel MKL ([<em><a href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html" class="uri">https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html</a></em>])</p></li>
+<li><p><strong>or</strong> Intel MKL</p></li>
 </ul></li>
 <li><p>A scheduler</p>
 <ul>
@@ -491,19 +513,19 @@ Fig 6: Shiny app troubleshoot page
 <div id="installing-epitweetr-from-cran" class="section level3">
 <h3>Installing epitweetr from CRAN</h3>
 <p>After installing all required dependencies listed in the section “Prerequisites for running epitweetr”, you can install <code>epitweetr</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">install.packages</span>(epitweetr)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(epitweetr)</span></code></pre></div>
 <div id="environment-variables" class="section level4">
 <h4>Environment variables</h4>
 <p>Additionally, the R environment needs to know where the Java installation home is. To check this, type in the R console:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">Sys.getenv</span>(<span class="st">&quot;JAVA_HOME&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">Sys.getenv</span>(<span class="st">&quot;JAVA_HOME&quot;</span>)</span></code></pre></div>
 <p>If the command returns null or empty, then you will need to set the Java Home environment variable, for your operating system (OS). Please see your specific OS instructions. In some cases, <code>epitweetr</code> can work without setting the Java Home environment variable.</p>
 <p>The first time you run the application, if the tool cannot identify a secure password store provided by the operating system, you will see a pop-up window requesting a keyring password (Linux and Mac). This is a password necessary for storing encrypted Twitter credentials. Please choose a strong password and remember it. You will be asked for this password each time you run the tool. You can avoid this by setting a system environment variable named ecdc_twitter_tool_kr_password containing the chosen password.</p>
 </div>
 <div id="launching-the-epitweetr-shiny-app" class="section level4">
 <h4>Launching the epitweetr Shiny app</h4>
 <p>You can launch the <code>epitweetr</code> Shiny app from the R session by typing in the R console. Replace “data_dir” with the designated data directory (full path) which is a local folder you choose to store tweets, time series and configuration files in:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <p>Please note that the data directory entered in R should have ‘/’ instead of ‘\’ (an example of a correct path would be ‘C:/user/name/Documents’). This applies especially in Windows if you copy the path from the File Explorer.</p>
 <p>Alternatively, you can use a launcher: In an executable .bat or shell file type the following (replacing “data_dir” with the designated data directory):</p>
 <p>R –vanilla -e epitweetr::epitweetr_app(“data_dir”)</p>
@@ -544,8 +566,8 @@ Fig 6: Shiny app troubleshoot page
 <ul>
 <li>Launch the Shiny app (from the R console)</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <ul>
 <li>In the configuration page of the Shiny app, in the manual tasks of the “Requirements &amp; alerts pipeline”, click on “Run dependencies”, “Run GeoNames” and “Run languages” (their status will change to “pending”). This allows the ‘Requirements &amp; alerts’ pipeline to download the elements needed. As long as no languages are added and no updates are available in geonames.org, these tasks have to be run only the first time you install <code>epitweetr</code>.</li>
 </ul>
@@ -559,8 +581,8 @@ Fig 6: Shiny app troubleshoot page
 <li><p>Other platforms: In a new R session, run the following command</p></li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb6-2" title="2"><span class="kw">fs_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">fs_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <ul>
 <li><p>You can confirm that the embeded database is running if the ‘epitweetr database’ status is “Running” in the Shiny app configuration page and “true” in the Shiny app troubleshoot page.</p></li>
 <li><p>Activate the tweet collection and data processing</p>
@@ -569,8 +591,8 @@ Fig 6: Shiny app troubleshoot page
 <li><p>Other platforms: In a new R session, run the following command</p></li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb7-2" title="2"><span class="kw">search_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="kw">search_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <ul>
 <li><p>You can confirm that the tweet collection is running, if the ‘Data collection &amp; processing’ status is “Running” in the Shiny app configuration page (green text in screenshot above) and “true” in the Shiny app troubleshoot page.</p></li>
 <li><p>Activate the epitweetr database</p>
@@ -579,8 +601,8 @@ Fig 6: Shiny app troubleshoot page
 <li><p>Other platforms: In a new R session, run the following command</p></li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb8-2" title="2"><span class="kw">fs_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">fs_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <ul>
 <li><p>You can confirm that the epitweetr database is active if the ‘epitweetr database’ status is “Running” in the Shiny app configuration page (green text in screenshot above) and “true” in the Shiny app troubleshoot page.</p></li>
 <li><p>Activate the ‘Requirements &amp; alerts’ pipeline:</p>
@@ -589,8 +611,8 @@ Fig 6: Shiny app troubleshoot page
 <li>Other platforms: In a new R session run the following command</li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"><span class="kw">library</span>(epitweetr)</a>
-<a class="sourceLine" id="cb9-2" title="2"><span class="kw">detect_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">library</span>(epitweetr)</span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="kw">detect_loop</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <ul>
 <li><p>You can confirm that the ‘Requirements &amp; alerts’ pipeline is running, if the ‘Requirements &amp; alerts’ pipeline status is “Running” in the Shiny app configuration page and “true” in the Shiny app troubleshoot page.</p></li>
 <li><p>You will be able to visualise tweets after ‘Data collection &amp; processing’ and ‘epitweetr database’ are activated and the languages task has finished successfully.</p></li>
@@ -813,8 +835,8 @@ Fig 6: Shiny app troubleshoot page
 <li><p>Words: Words present in tweets. Words are then aggregated in the topwords time series</p></li>
 <li><p>Hashtags: hashtags present in tweets. Hashtags are then aggregated in the hashtags time series</p></li>
 <li><p>URLs: URLs present in tweets. URLs are then aggregated in the URLs time series</p></li>
-<li><p>Entities: Entities are automatically extracted and identified by the Twitter API v2. These are then aggregated in the entities time series. This information is only available when the API v2 is activated and properly configured. As per <a href="https://developer.twitter.com/en/docs/labs/annotations"><em>Twitter documentation</em></a> “Entities are comprised of people, places, products, and organizations […]. They are programmatically assigned based on what is explicitly mentioned in the tweet text”.</p></li>
-<li><p>Contexts: Contexts are automatically extracted and identified by the Twitter API v2. These are then aggregated in the contexts time series. This information is only available when the API v2 is activated and properly configured. As per <a href="https://developer.twitter.com/en/docs/labs/annotations"><em>Twitter documentation</em></a> “[Context are] derived from the analysis of a tweet’s text and will include a domain and entity pairing which can be used to discover tweets on topics that may have been previously difficult to surface […]. [It uses] a list of 50+ domains to categorize tweets”.</p></li>
+<li><p>Entities: Entities are automatically extracted and identified by the Twitter API v2. These are then aggregated in the entities time series. This information is only available when the API v2 is activated and properly configured. As per <a href="https://developer.twitter.com/en/docs/twitter-api/annotations/overview"><em>Twitter documentation</em></a> “Entities are comprised of people, places, products, and organizations […]. They are programmatically assigned based on what is explicitly mentioned in the tweet text”.</p></li>
+<li><p>Contexts: Contexts are automatically extracted and identified by the Twitter API v2. These are then aggregated in the contexts time series. This information is only available when the API v2 is activated and properly configured. As per <a href="https://developer.twitter.com/en/docs/twitter-api/annotations/overview"><em>Twitter documentation</em></a> “[Context are] derived from the analysis of a tweet’s text and will include a domain and entity pairing which can be used to discover tweets on topics that may have been previously difficult to surface […]. [It uses] a list of 50+ domains to categorize tweets”.</p></li>
 </ul>
 <p>Note that, differently to the other visualisation figures, the most frequent elements found in and extracted from tweets are always based on the geolocation related to “tweet location” and not to “user location” regardless of the filter selected in the dashboard. Topwords &amp; hashtags and entities &amp; contexts are shown in the same figure, respectively.</p>
 <div id="aggregation-of-data" class="section level4">
@@ -942,7 +964,7 @@ U_{0} = \overline{\ y_{0}} + t_{1 - a}(7 - 1)\times s_{0} \times   \sqrt{1 + \fr
 <div id="the-interactive-user-application-shiny-app" class="section level2">
 <h2>The interactive user application (Shiny app)</h2>
 <p>You can launch the <code>epitweetr</code> interactive user application (Shiny app) from the R session by typing in the R console (replace “data_dir” with the desired data directory):</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">epitweetr_app</span>(<span class="st">&quot;data_dir&quot;</span>)</span></code></pre></div>
 <p>Alternatively, you can use a launcher: Put the following content in an executable bat or sh file, (replacing “data_dir” with the expected data directory)</p>
 <p>R –vanilla -e epitweetr::epitweetr_app(‘data_dir’)</p>
 <p>The <code>epitweetr</code> interactive user application has six pages:</p>
@@ -950,7 +972,7 @@ U_{0} = \overline{\ y_{0}} + t_{1 - a}(7 - 1)\times s_{0} \times   \sqrt{1 + \fr
 <li><p>The dashboard, where a user can visualise and explore tweets</p></li>
 <li><p>The alerts page, where a user can view the current alerts and train machine learning algorithms for alert classification on user’s defined categories</p></li>
 <li><p>The geotag evaluation page, where a user can evaluate the geolocation algorithm and provide annotations for improving its performance</p></li>
-<li>The data protection page, where a user can search, anonymise and delete tweets from the <code>epitweetr</code> database to support data deletion requests</li>
+<li><p>The data protection page, where a user can search, anonymise and delete tweets from the <code>epitweetr</code> database to support data deletion requests</p></li>
 <li><p>The configuration page, where a user can change settings and check the status of the underlying processes</p></li>
 <li><p>The troubleshoot page, with with automatic checks and hints for using <code>epitweetr</code> with all its functionalities and tools to backup &amp; share your installation</p></li>
 </ul>
@@ -1416,7 +1438,7 @@ Fig 5: Upper limit with and without downweighting for the epitweetr Ebola data
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
-<div id="refs">
+<div id="refs" class="references hanging-indent">
 <div id="ref-allevius_prospective_2017">
 <p>Allévius, Benjamin, and Michael Höhle. 2017. “Prospective Detection of Outbreaks.” <em>arXiv:1711.08960 [Stat]</em>, November. <a href="https://arxiv.org/abs/1711.08960">https://arxiv.org/abs/1711.08960</a>.</p>
 </div>

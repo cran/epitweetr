@@ -12,8 +12,7 @@ get_alerts(
   toptweets = 0,
   limit = 0,
   duplicates = "all",
-  progress = function(a, b) {
- }
+  progress = function(a, b) { }
 )
 }
 \arguments{
